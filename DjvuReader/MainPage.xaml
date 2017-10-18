@@ -5,9 +5,15 @@
     xmlns:local="using:DjvuReader"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="102*"/>
+            <ColumnDefinition Width="1399*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Pages:" Grid.Column="0"/>
+        <TextBox HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" x:Name="PageCount" Grid.Column="1"/>
     </Grid>
 </Page>

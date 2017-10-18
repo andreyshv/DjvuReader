@@ -26,5 +26,14 @@ namespace DjvuReader
         {
             this.InitializeComponent();
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            int i = djvulibre.Document.test1(2);
+            string s = djvulibre.Document.test2("-abc");
+            var fileName = @"c:\my\VS - Projects\djvu\djvulibre\doc\djvu3spec.djvu";
+            var doc = djvulibre.Document.Open(fileName);
+            PageCount.Text = doc.GetPageCount().ToString();
+        }
     }
 }
