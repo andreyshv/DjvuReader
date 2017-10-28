@@ -1,23 +1,33 @@
 #pragma once
 
 #include "libdjvu\DjVuDocument.h"
+#include "libdjvu\GBitmap.h"
+#include "libdjvu\GPixmap.h"
 
-using namespace Platform;
+#include "winrt/Windows.Foundation.h"
+#include <string>
+
+typedef uint8 byte;
 
 namespace djvulibre
 {
+	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class Document sealed
 	{
 	public:
-		static int test1(int a);
-		static String^ test2(String^ b);
-		static Document^ Open(String^ fileName);
+		static Document^ Open(Platform::String^ fileName);
 
 		int GetPageCount();
+		int GetPageView(int pageNum);
+
+		Windows::Graphics::Imaging::SoftwareBitmap^ Document::DrawImage();
 	private:
 		Document(GP<DjVuDocument> pDoc);
 
 		GP<DjVuDocument> _doc;
+
+		static std::string ConvertCxStringToUTF8(Platform::String^ stringToConvert);
+		Windows::Graphics::Imaging::SoftwareBitmap^ Document::CreateSoftwareBitmap(GP<GBitmap> pGBitmap, GP<GPixmap> pGPixmap);
 	};
 
 }

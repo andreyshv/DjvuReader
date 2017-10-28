@@ -89,12 +89,7 @@
 #endif
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 GUTF8String &
 DjVuMessage::programname(void)
@@ -437,11 +432,11 @@ getbodies(
       GP<lt_XMLTags> gtags;
       {
         GP<ByteStream> bs=ByteStream::create(url,"rb");
-        G_TRY
+        try
         {
           gtags=lt_XMLTags::create(bs);
         }
-        G_CATCH(ex)
+        catch(const GException &ex) {
         {
           GUTF8String mesg(failed_to_parse_XML+("\t"+url.get_string()));
           if(errors.length())
@@ -453,7 +448,7 @@ getbodies(
           }
           errors+="\n"+GUTF8String(ex.get_cause());
         }
-        G_ENDCATCH;
+        };
       }
       if(gtags)
       {
@@ -593,12 +588,10 @@ DjVuMessageLookUpUTF8(
 
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 
 void
 DjVuFormatErrorUTF8( const char *fmt, ... )

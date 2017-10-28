@@ -70,12 +70,7 @@
 
 #include "GString.h"
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 class lt_XMLTags;
 class ByteStream;
@@ -216,11 +211,9 @@ protected:
 };
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 #endif /* __DJVU_MESSAGE_LITE_H__ */
 

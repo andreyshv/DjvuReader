@@ -72,12 +72,7 @@
 #include <ctype.h>
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 // GLParser.h and GLParser.cpp used to be separate files capable to decode
@@ -557,16 +552,16 @@ GLParser::parse(const char * cur_name, GPList<GLObject> & list,
       
       // OK. Get the object contents
       GPList<GLObject> new_list;
-      G_TRY
+      try
       {
         parse(object->get_symbol(), new_list, start);
       } 
-      G_CATCH(exc)
+      catch(const GException &exc) {
       {
         if (exc.cmp_cause(ByteStream::EndOfFile))
-          G_RETHROW;
+          throw;
       } 
-      G_ENDCATCH;
+      };
       list.append(new GLObject(object->get_symbol(), new_list));
       continue;
     }
@@ -612,15 +607,15 @@ GLParser::parse(const char * str)
    DEBUG_MSG("GLParser::parse(): parsing string contents\n");
    DEBUG_MAKE_INDENT(3);
    
-   G_TRY
+   try
    {
       check_compat(str);
       parse("toplevel", list, str);
-   } G_CATCH(exc)
+   } catch(const GException &exc) {
    {
       if (exc.cmp_cause(ByteStream::EndOfFile))
-        G_RETHROW;
-   } G_ENDCATCH;
+        throw;
+   } };
 }
 
 void
@@ -865,7 +860,7 @@ DjVuANT::get_bg_color(GLParser & parser)
   unsigned long retval=default_bg_color;
   DEBUG_MSG("DjVuANT::get_bg_color(): getting background color ...\n");
   DEBUG_MAKE_INDENT(3);
-  G_TRY
+  try
   {
     GP<GLObject> obj=parser.get_object(BACKGROUND_TAG);
     if (obj && obj->get_list().size()==1)
@@ -880,7 +875,7 @@ DjVuANT::get_bg_color(GLParser & parser)
       DEBUG_MSG("can't find any.\n");
     }
 #endif // NDEBUG
-  } G_CATCH_ALL {} G_ENDCATCH;
+  } catch(...) { {} };
 #ifndef NDEBUG
   if(retval == default_bg_color)
   {
@@ -900,7 +895,7 @@ DjVuANT::get_zoom(GLParser & parser)
   int retval=ZOOM_UNSPEC;
   DEBUG_MSG("DjVuANT::get_zoom(): getting zoom factor ...\n");
   DEBUG_MAKE_INDENT(3);
-  G_TRY
+  try
   {
     GP<GLObject> obj=parser.get_object(ZOOM_TAG);
     if (obj && obj->get_list().size()==1)
@@ -933,7 +928,7 @@ DjVuANT::get_zoom(GLParser & parser)
       DEBUG_MSG("can't find any.\n");
     }
 #endif // NDEBUG
-  } G_CATCH_ALL {} G_ENDCATCH;
+  } catch(...) { {} };
 #ifndef NDEBUG
   if(retval == ZOOM_UNSPEC)
   {
@@ -949,7 +944,7 @@ DjVuANT::get_mode(GLParser & parser)
   int retval=MODE_UNSPEC;
   DEBUG_MSG("DjVuAnt::get_mode(): getting default mode ...\n");
   DEBUG_MAKE_INDENT(3);
-  G_TRY
+  try
   {
     GP<GLObject> obj=parser.get_object(MODE_TAG);
     if (obj && obj->get_list().size()==1)
@@ -971,7 +966,7 @@ DjVuANT::get_mode(GLParser & parser)
       DEBUG_MSG("can't find any.\n");
     }
 #endif // NDEBUG
-  } G_CATCH_ALL {} G_ENDCATCH;
+  } catch(...) { {} };
 #ifndef NDEBUG
   if(retval == MODE_UNSPEC)
   {
@@ -1023,7 +1018,7 @@ DjVuANT::get_hor_align(GLParser & parser)
   DEBUG_MSG("DjVuAnt::get_hor_align(): getting hor page alignemnt ...\n");
   DEBUG_MAKE_INDENT(3);
   alignment retval=ALIGN_UNSPEC;
-  G_TRY
+  try
   {
     GP<GLObject> obj=parser.get_object(ALIGN_TAG);
     if (obj && obj->get_list().size()==2)
@@ -1047,7 +1042,7 @@ DjVuANT::get_hor_align(GLParser & parser)
       DEBUG_MSG("can't find any.\n");
     }
 #endif // NDEBUG
-  } G_CATCH_ALL {} G_ENDCATCH;
+  } catch(...) { {} };
 #ifndef NDEBUG
   if(retval == ALIGN_UNSPEC)
   {
@@ -1063,7 +1058,7 @@ DjVuANT::get_ver_align(GLParser & parser)
   DEBUG_MSG("DjVuAnt::get_ver_align(): getting vert page alignemnt ...\n");
   DEBUG_MAKE_INDENT(3);
   alignment retval=ALIGN_UNSPEC;
-  G_TRY
+  try
   {
     GP<GLObject> obj=parser.get_object(ALIGN_TAG);
     if (obj && obj->get_list().size()==2)
@@ -1086,7 +1081,7 @@ DjVuANT::get_ver_align(GLParser & parser)
       DEBUG_MSG("can't find any.\n");
     }
 #endif // NDEBUG
-  } G_CATCH_ALL {} G_ENDCATCH;
+  } catch(...) { {} };
 #ifndef NDEBUG
   if(retval == ALIGN_UNSPEC)
   {
@@ -1110,7 +1105,7 @@ DjVuANT::get_metadata(GLParser & parser)
       GLObject & obj=*list[pos];
       if (obj.get_type()==GLObject::LIST && obj.get_name()==METADATA_TAG)  
         { 
-          G_TRY 
+          try 
             {
               for(int obj_num=0;obj_num<obj.get_list().size();obj_num++)
                 {
@@ -1123,7 +1118,7 @@ DjVuANT::get_metadata(GLParser & parser)
                     }
                 }
             } 
-          G_CATCH_ALL { } G_ENDCATCH;
+          catch(...) { { } };
         }
     }
   return mdata;
@@ -1142,7 +1137,7 @@ DjVuANT::get_xmpmetadata(GLParser & parser)
       GLObject &obj = *list[pos];
       if (obj.get_type()==GLObject::LIST && obj.get_name()==XMP_TAG)  
         { 
-          G_TRY 
+          try 
             {
               if (obj.get_list().size() >= 1)
                 {
@@ -1151,7 +1146,7 @@ DjVuANT::get_xmpmetadata(GLParser & parser)
                   break;
                 }
             } 
-          G_CATCH_ALL { } G_ENDCATCH;
+          catch(...) { { } };
         }
     }
   return xmp;
@@ -1177,7 +1172,7 @@ DjVuANT::get_map_areas(GLParser & parser)
       const GUTF8String name=obj.get_name();
       if(name == GMapArea::MAPAREA_TAG)
       {
-        G_TRY {
+        try {
 	       // Getting the url
           GUTF8String url;
           GUTF8String target=GMapArea::TARGET_SELF;
@@ -1278,7 +1273,7 @@ DjVuANT::get_map_areas(GLParser & parser)
             } // for(int obj_num=...)
             map_areas.append(map_area);
           } // if (map_area) ...
-        } G_CATCH_ALL {} G_ENDCATCH;
+        } catch(...) { {} };
       }
     }
   } // while(item==...)
@@ -1538,9 +1533,7 @@ DjVuAnno::merge(const GP<DjVuAnno> & anno)
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

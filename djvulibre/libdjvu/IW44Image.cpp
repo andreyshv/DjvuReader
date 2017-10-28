@@ -91,12 +91,7 @@
 #include <math.h>
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 #define IWALLOCSIZE    4080
@@ -117,11 +112,11 @@ namespace DJVU {
 
 
 static const int iw_quant[16] = {
-  0x004000, 
+  0x004000,
   0x008000, 0x008000, 0x010000,
   0x010000, 0x010000, 0x020000,
   0x020000, 0x020000, 0x040000,
-  0x040000, 0x040000, 0x080000, 
+  0x040000, 0x040000, 0x080000,
   0x040000, 0x040000, 0x080000
 };
 
@@ -135,16 +130,16 @@ static const float iw_norm[16] = {
 };
 
 static const int iw_border = 3;
-static const int iw_shift  = 6;
-static const int iw_round  = (1<<(iw_shift-1));
+static const int iw_shift = 6;
+static const int iw_round = (1 << (iw_shift - 1));
 
-class IW44Image::Codec::Decode : public IW44Image::Codec 
+class IW44Image::Codec::Decode : public IW44Image::Codec
 {
 public:
-  // Construction
-  Decode(IW44Image::Map &map) : Codec(map) {}
-  // Coding
-  virtual int code_slice(ZPCodec &zp);
+	// Construction
+	Decode(IW44Image::Map &map) : Codec(map) {}
+	// Coding
+	virtual int code_slice(ZPCodec &zp);
 };
 
 //////////////////////////////////////////////////////
@@ -159,301 +154,301 @@ public:
 
 #ifdef MMX
 
-static const short w9[]  = {9,9,9,9};
-static const short w1[]  = {1,1,1,1};
-static const int   d8[]  = {8,8};
-static const int   d16[] = {16,16};
+static const short w9[] = { 9,9,9,9 };
+static const short w1[] = { 1,1,1,1 };
+static const int   d8[] = { 8,8 };
+static const int   d16[] = { 16,16 };
 
 static void
-mmx_bv_1 ( short* &q, short* e, int s, int s3 )
+mmx_bv_1(short* &q, short* e, int s, int s3)
 {
-  while (q<e && (((size_t)q)&0x7))
-    {
-      int a = (int)q[-s] + (int)q[s];
-      int b = (int)q[-s3] + (int)q[s3];
-      *q -= (((a<<3)+a-b+16)>>5);
-      q ++;
-  }
-  while (q+3 < e)
-    {
-      MMXar( movq,       q-s,mm0);  // MM0=[ b3, b2, b1, b0 ]
-      MMXar( movq,       q+s,mm2);  // MM2=[ c3, c2, c1, c0 ]
-      MMXrr( movq,       mm0,mm1);  
-      MMXrr( punpcklwd,  mm2,mm0);  // MM0=[ c1, b1, c0, b0 ]
-      MMXrr( punpckhwd,  mm2,mm1);  // MM1=[ c3, b3, c2, b2 ]
-      MMXar( pmaddwd,    w9,mm0);   // MM0=[ (c1+b1)*9, (c0+b0)*9 ]
-      MMXar( pmaddwd,    w9,mm1);   // MM1=[ (c3+b3)*9, (c2+b2)*9 ]
-      MMXar( movq,       q-s3,mm2);
-      MMXar( movq,       q+s3,mm4);
-      MMXrr( movq,       mm2,mm3);
-      MMXrr( punpcklwd,  mm4,mm2);  // MM2=[ d1, a1, d0, a0 ]
-      MMXrr( punpckhwd,  mm4,mm3);  // MM3=[ d3, a3, d2, a2 ]
-      MMXar( pmaddwd,    w1,mm2);   // MM2=[ (a1+d1)*1, (a0+d0)*1 ]
-      MMXar( pmaddwd,    w1,mm3);   // MM3=[ (a3+d3)*1, (a2+d2)*1 ]
-      MMXar( paddd,      d16,mm0);
-      MMXar( paddd,      d16,mm1);
-      MMXrr( psubd,      mm2,mm0);  // MM0=[ (c1+b1)*9-a1-d1+8, ...
-      MMXrr( psubd,      mm3,mm1);  // MM1=[ (c3+b3)*9-a3-d3+8, ...
-      MMXir( psrad,      5,mm0);
-      MMXar( movq,       q,mm7);    // MM7=[ p3,p2,p1,p0 ]
-      MMXir( psrad,      5,mm1);
-      MMXrr( packssdw,   mm1,mm0);  // MM0=[ x3,x2,x1,x0 ]
-      MMXrr( psubw,      mm0,mm7);  // MM7=[ p3-x3, p2-x2, ... ]
-      MMXra( movq,       mm7,q);
+	while (q < e && (((size_t)q) & 0x7))
+	{
+		int a = (int)q[-s] + (int)q[s];
+		int b = (int)q[-s3] + (int)q[s3];
+		*q -= (((a << 3) + a - b + 16) >> 5);
+		q++;
+	}
+	while (q + 3 < e)
+	{
+		MMXar(movq, q - s, mm0);  // MM0=[ b3, b2, b1, b0 ]
+		MMXar(movq, q + s, mm2);  // MM2=[ c3, c2, c1, c0 ]
+		MMXrr(movq, mm0, mm1);
+		MMXrr(punpcklwd, mm2, mm0);  // MM0=[ c1, b1, c0, b0 ]
+		MMXrr(punpckhwd, mm2, mm1);  // MM1=[ c3, b3, c2, b2 ]
+		MMXar(pmaddwd, w9, mm0);   // MM0=[ (c1+b1)*9, (c0+b0)*9 ]
+		MMXar(pmaddwd, w9, mm1);   // MM1=[ (c3+b3)*9, (c2+b2)*9 ]
+		MMXar(movq, q - s3, mm2);
+		MMXar(movq, q + s3, mm4);
+		MMXrr(movq, mm2, mm3);
+		MMXrr(punpcklwd, mm4, mm2);  // MM2=[ d1, a1, d0, a0 ]
+		MMXrr(punpckhwd, mm4, mm3);  // MM3=[ d3, a3, d2, a2 ]
+		MMXar(pmaddwd, w1, mm2);   // MM2=[ (a1+d1)*1, (a0+d0)*1 ]
+		MMXar(pmaddwd, w1, mm3);   // MM3=[ (a3+d3)*1, (a2+d2)*1 ]
+		MMXar(paddd, d16, mm0);
+		MMXar(paddd, d16, mm1);
+		MMXrr(psubd, mm2, mm0);  // MM0=[ (c1+b1)*9-a1-d1+8, ...
+		MMXrr(psubd, mm3, mm1);  // MM1=[ (c3+b3)*9-a3-d3+8, ...
+		MMXir(psrad, 5, mm0);
+		MMXar(movq, q, mm7);    // MM7=[ p3,p2,p1,p0 ]
+		MMXir(psrad, 5, mm1);
+		MMXrr(packssdw, mm1, mm0);  // MM0=[ x3,x2,x1,x0 ]
+		MMXrr(psubw, mm0, mm7);  // MM7=[ p3-x3, p2-x2, ... ]
+		MMXra(movq, mm7, q);
 #if defined(_MSC_VER) && defined(_DEBUG)
-      MMXemms;
+		MMXemms;
 #endif
-      q += 4;
-    }
+		q += 4;
+	}
 }
 
 
 static void
-mmx_bv_2 ( short* &q, short* e, int s, int s3 )
+mmx_bv_2(short* &q, short* e, int s, int s3)
 {
-  while (q<e && (((size_t)q)&0x7))
-    {
-      int a = (int)q[-s] + (int)q[s];
-      int b = (int)q[-s3] + (int)q[s3];
-      *q += (((a<<3)+a-b+8)>>4);
-      q ++;
-    }
-  while (q+3 < e)
-    {
-      MMXar( movq,       q-s,mm0);  // MM0=[ b3, b2, b1, b0 ]
-      MMXar( movq,       q+s,mm2);  // MM2=[ c3, c2, c1, c0 ]
-      MMXrr( movq,       mm0,mm1);  
-      MMXrr( punpcklwd,  mm2,mm0);  // MM0=[ c1, b1, c0, b0 ]
-      MMXrr( punpckhwd,  mm2,mm1);  // MM1=[ c3, b3, c2, b2 ]
-      MMXar( pmaddwd,    w9,mm0);   // MM0=[ (c1+b1)*9, (c0+b0)*9 ]
-      MMXar( pmaddwd,    w9,mm1);   // MM1=[ (c3+b3)*9, (c2+b2)*9 ]
-      MMXar( movq,       q-s3,mm2);
-      MMXar( movq,       q+s3,mm4);
-      MMXrr( movq,       mm2,mm3);
-      MMXrr( punpcklwd,  mm4,mm2);  // MM2=[ d1, a1, d0, a0 ]
-      MMXrr( punpckhwd,  mm4,mm3);  // MM3=[ d3, a3, d2, a2 ]
-      MMXar( pmaddwd,    w1,mm2);   // MM2=[ (a1+d1)*1, (a0+d0)*1 ]
-      MMXar( pmaddwd,    w1,mm3);   // MM3=[ (a3+d3)*1, (a2+d2)*1 ]
-      MMXar( paddd,      d8,mm0);
-      MMXar( paddd,      d8,mm1);
-      MMXrr( psubd,      mm2,mm0);  // MM0=[ (c1+b1)*9-a1-d1+8, ...
-      MMXrr( psubd,      mm3,mm1);  // MM1=[ (c3+b3)*9-a3-d3+8, ...
-      MMXir( psrad,      4,mm0);
-      MMXar( movq,       q,mm7);    // MM7=[ p3,p2,p1,p0 ]
-      MMXir( psrad,      4,mm1);
-      MMXrr( packssdw,   mm1,mm0);  // MM0=[ x3,x2,x1,x0 ]
-      MMXrr( paddw,      mm0,mm7);  // MM7=[ p3+x3, p2+x2, ... ]
-      MMXra( movq,       mm7,q);
+	while (q < e && (((size_t)q) & 0x7))
+	{
+		int a = (int)q[-s] + (int)q[s];
+		int b = (int)q[-s3] + (int)q[s3];
+		*q += (((a << 3) + a - b + 8) >> 4);
+		q++;
+	}
+	while (q + 3 < e)
+	{
+		MMXar(movq, q - s, mm0);  // MM0=[ b3, b2, b1, b0 ]
+		MMXar(movq, q + s, mm2);  // MM2=[ c3, c2, c1, c0 ]
+		MMXrr(movq, mm0, mm1);
+		MMXrr(punpcklwd, mm2, mm0);  // MM0=[ c1, b1, c0, b0 ]
+		MMXrr(punpckhwd, mm2, mm1);  // MM1=[ c3, b3, c2, b2 ]
+		MMXar(pmaddwd, w9, mm0);   // MM0=[ (c1+b1)*9, (c0+b0)*9 ]
+		MMXar(pmaddwd, w9, mm1);   // MM1=[ (c3+b3)*9, (c2+b2)*9 ]
+		MMXar(movq, q - s3, mm2);
+		MMXar(movq, q + s3, mm4);
+		MMXrr(movq, mm2, mm3);
+		MMXrr(punpcklwd, mm4, mm2);  // MM2=[ d1, a1, d0, a0 ]
+		MMXrr(punpckhwd, mm4, mm3);  // MM3=[ d3, a3, d2, a2 ]
+		MMXar(pmaddwd, w1, mm2);   // MM2=[ (a1+d1)*1, (a0+d0)*1 ]
+		MMXar(pmaddwd, w1, mm3);   // MM3=[ (a3+d3)*1, (a2+d2)*1 ]
+		MMXar(paddd, d8, mm0);
+		MMXar(paddd, d8, mm1);
+		MMXrr(psubd, mm2, mm0);  // MM0=[ (c1+b1)*9-a1-d1+8, ...
+		MMXrr(psubd, mm3, mm1);  // MM1=[ (c3+b3)*9-a3-d3+8, ...
+		MMXir(psrad, 4, mm0);
+		MMXar(movq, q, mm7);    // MM7=[ p3,p2,p1,p0 ]
+		MMXir(psrad, 4, mm1);
+		MMXrr(packssdw, mm1, mm0);  // MM0=[ x3,x2,x1,x0 ]
+		MMXrr(paddw, mm0, mm7);  // MM7=[ p3+x3, p2+x2, ... ]
+		MMXra(movq, mm7, q);
 #if defined(_MSC_VER) && defined(_DEBUG)
-      MMXemms;
+		MMXemms;
 #endif
-      q += 4;
-    }
+		q += 4;
+	}
 }
 #endif /* MMX */
 
-static void 
+static void
 filter_bv(short *p, int w, int h, int rowsize, int scale)
 {
-  int y = 0;
-  int s = scale*rowsize;
-  int s3 = s+s+s;
-  h = ((h-1)/scale)+1;
-  while (y-3 < h)
-    {
-      // 1-Lifting
-      {
-        short *q = p;
-        short *e = q+w;
-        if (y>=3 && y+3<h)
-          {
-            // Generic case
+	int y = 0;
+	int s = scale*rowsize;
+	int s3 = s + s + s;
+	h = ((h - 1) / scale) + 1;
+	while (y - 3 < h)
+	{
+		// 1-Lifting
+		{
+			short *q = p;
+			short *e = q + w;
+			if (y >= 3 && y + 3 < h)
+			{
+				// Generic case
 #ifdef MMX
-            if (scale==1 && MMXControl::mmxflag>0)
-              mmx_bv_1(q, e, s, s3);
+				if (scale == 1 && MMXControl::mmxflag > 0)
+					mmx_bv_1(q, e, s, s3);
 #endif
-            while (q<e)
-              {
-                int a = (int)q[-s] + (int)q[s];
-                int b = (int)q[-s3] + (int)q[s3];
-                *q -= (((a<<3)+a-b+16)>>5);
-                q += scale;
-              }
-          }
-        else if (y<h)
-          {
-            // Special cases
-            short *q1 = (y+1<h ? q+s : 0);
-            short *q3 = (y+3<h ? q+s3 : 0);
-            if (y>=3)
-              {
-                while (q<e)
-                  {
-                    int a = (int)q[-s] + (q1 ? (int)(*q1) : 0);
-                    int b = (int)q[-s3] + (q3 ? (int)(*q3) : 0);
-                    *q -= (((a<<3)+a-b+16)>>5);
-                    q += scale;
-                    if (q1) q1 += scale;
-                    if (q3) q3 += scale;
-                  }
-              }
-            else if (y>=1)
-              {
-                while (q<e)
-                  {
-                    int a = (int)q[-s] + (q1 ? (int)(*q1) : 0);
-                    int b = (q3 ? (int)(*q3) : 0);
-                    *q -= (((a<<3)+a-b+16)>>5);
-                    q += scale;
-                    if (q1) q1 += scale;
-                    if (q3) q3 += scale;
-                  }
-              }
-            else
-              {
-                while (q<e)
-                  {
-                    int a = (q1 ? (int)(*q1) : 0);
-                    int b = (q3 ? (int)(*q3) : 0);
-                    *q -= (((a<<3)+a-b+16)>>5);
-                    q += scale;
-                    if (q1) q1 += scale;
-                    if (q3) q3 += scale;
-                  }
-              }
-          }
-      }
-      // 2-Interpolation
-      {
-        short *q = p-s3;
-        short *e = q+w;
-        if (y>=6 && y<h)
-          {
-            // Generic case
+				while (q < e)
+				{
+					int a = (int)q[-s] + (int)q[s];
+					int b = (int)q[-s3] + (int)q[s3];
+					*q -= (((a << 3) + a - b + 16) >> 5);
+					q += scale;
+				}
+			}
+			else if (y < h)
+			{
+				// Special cases
+				short *q1 = (y + 1 < h ? q + s : 0);
+				short *q3 = (y + 3 < h ? q + s3 : 0);
+				if (y >= 3)
+				{
+					while (q < e)
+					{
+						int a = (int)q[-s] + (q1 ? (int)(*q1) : 0);
+						int b = (int)q[-s3] + (q3 ? (int)(*q3) : 0);
+						*q -= (((a << 3) + a - b + 16) >> 5);
+						q += scale;
+						if (q1) q1 += scale;
+						if (q3) q3 += scale;
+					}
+				}
+				else if (y >= 1)
+				{
+					while (q < e)
+					{
+						int a = (int)q[-s] + (q1 ? (int)(*q1) : 0);
+						int b = (q3 ? (int)(*q3) : 0);
+						*q -= (((a << 3) + a - b + 16) >> 5);
+						q += scale;
+						if (q1) q1 += scale;
+						if (q3) q3 += scale;
+					}
+				}
+				else
+				{
+					while (q < e)
+					{
+						int a = (q1 ? (int)(*q1) : 0);
+						int b = (q3 ? (int)(*q3) : 0);
+						*q -= (((a << 3) + a - b + 16) >> 5);
+						q += scale;
+						if (q1) q1 += scale;
+						if (q3) q3 += scale;
+					}
+				}
+			}
+		}
+		// 2-Interpolation
+		{
+			short *q = p - s3;
+			short *e = q + w;
+			if (y >= 6 && y < h)
+			{
+				// Generic case
 #ifdef MMX
-            if (scale==1 && MMXControl::mmxflag>0)
-              mmx_bv_2(q, e, s, s3);
+				if (scale == 1 && MMXControl::mmxflag > 0)
+					mmx_bv_2(q, e, s, s3);
 #endif
-            while (q<e)
-              {
-                int a = (int)q[-s] + (int)q[s];
-                int b = (int)q[-s3] + (int)q[s3];
-                *q += (((a<<3)+a-b+8)>>4);
-                q += scale;
-              }
-          }
-        else if (y>=3)
-          {
-            // Special cases
-            short *q1 = (y-2<h ? q+s : q-s);
-            while (q<e)
-              {
-                int a = (int)q[-s] + (int)(*q1);
-                *q += ((a+1)>>1);
-                q += scale;
-                q1 += scale;
-              }
-          }
-      }
-      y += 2;
-      p += s+s;
-    }
+				while (q < e)
+				{
+					int a = (int)q[-s] + (int)q[s];
+					int b = (int)q[-s3] + (int)q[s3];
+					*q += (((a << 3) + a - b + 8) >> 4);
+					q += scale;
+				}
+			}
+			else if (y >= 3)
+			{
+				// Special cases
+				short *q1 = (y - 2 < h ? q + s : q - s);
+				while (q < e)
+				{
+					int a = (int)q[-s] + (int)(*q1);
+					*q += ((a + 1) >> 1);
+					q += scale;
+					q1 += scale;
+				}
+			}
+		}
+		y += 2;
+		p += s + s;
+	}
 }
 
-static void 
+static void
 filter_bh(short *p, int w, int h, int rowsize, int scale)
 {
-  int y = 0;
-  int s = scale;
-  int s3 = s+s+s;
-  rowsize *= scale;
-  while (y<h)
-    {
-      short *q = p;
-      short *e = p+w;
-      int a0=0, a1=0, a2=0, a3=0;
-      int b0=0, b1=0, b2=0, b3=0;
-      if (q<e)
-        {
-          // Special case:  x=0
-          if (q+s < e)
-            a2 = q[s];
-          if (q+s3 < e)
-            a3 = q[s3];
-          b2 = b3 = q[0] - ((((a1+a2)<<3)+(a1+a2)-a0-a3+16) >> 5);
-          q[0] = b3;
-          q += s+s;
-        }
-      if (q<e)
-        {
-          // Special case:  x=2
-          a0 = a1;
-          a1 = a2;
-          a2 = a3;
-          if (q+s3 < e)
-            a3 = q[s3];
-          b3 = q[0] - ((((a1+a2)<<3)+(a1+a2)-a0-a3+16) >> 5);
-          q[0] = b3;
-          q += s+s;
-        }
-      if (q<e)
-        {
-          // Special case:  x=4
-          b1 = b2;
-          b2 = b3;
-          a0 = a1;
-          a1 = a2;
-          a2 = a3;
-          if (q+s3 < e)
-            a3 = q[s3];
-          b3 = q[0] - ((((a1+a2)<<3)+(a1+a2)-a0-a3+16) >> 5);
-          q[0] = b3;
-          q[-s3] = q[-s3] + ((b1+b2+1)>>1);
-          q += s+s;
-        }
-      while (q+s3 < e)
-        {
-          // Generic case
-          a0=a1; 
-          a1=a2; 
-          a2=a3;
-          a3=q[s3];
-          b0=b1; 
-          b1=b2; 
-          b2=b3;
-          b3 = q[0] - ((((a1+a2)<<3)+(a1+a2)-a0-a3+16) >> 5);
-          q[0] = b3;
-          q[-s3] = q[-s3] + ((((b1+b2)<<3)+(b1+b2)-b0-b3+8) >> 4);
-          q += s+s;
-        }
-      while (q < e)
-        {
-          // Special case:  w-3 <= x < w
-          a0=a1;
-          a1=a2; 
-          a2=a3;
-          a3=0;
-          b0=b1; 
-          b1=b2; 
-          b2=b3;
-          b3 = q[0] - ((((a1+a2)<<3)+(a1+a2)-a0-a3+16) >> 5);
-          q[0] = b3;
-          q[-s3] = q[-s3] + ((((b1+b2)<<3)+(b1+b2)-b0-b3+8) >> 4);
-          q += s+s;
-        }
-      while (q-s3 < e)
-        {
-          // Special case  w <= x < w+3
-          b0=b1; 
-          b1=b2; 
-          b2=b3;
-          if (q-s3 >= p)
-            q[-s3] = q[-s3] + ((b1+b2+1)>>1);
-          q += s+s;
-        }
-      y += scale;
-      p += rowsize;
-    }
+	int y = 0;
+	int s = scale;
+	int s3 = s + s + s;
+	rowsize *= scale;
+	while (y < h)
+	{
+		short *q = p;
+		short *e = p + w;
+		int a0 = 0, a1 = 0, a2 = 0, a3 = 0;
+		int b0 = 0, b1 = 0, b2 = 0, b3 = 0;
+		if (q < e)
+		{
+			// Special case:  x=0
+			if (q + s < e)
+				a2 = q[s];
+			if (q + s3 < e)
+				a3 = q[s3];
+			b2 = b3 = q[0] - ((((a1 + a2) << 3) + (a1 + a2) - a0 - a3 + 16) >> 5);
+			q[0] = b3;
+			q += s + s;
+		}
+		if (q < e)
+		{
+			// Special case:  x=2
+			a0 = a1;
+			a1 = a2;
+			a2 = a3;
+			if (q + s3 < e)
+				a3 = q[s3];
+			b3 = q[0] - ((((a1 + a2) << 3) + (a1 + a2) - a0 - a3 + 16) >> 5);
+			q[0] = b3;
+			q += s + s;
+		}
+		if (q < e)
+		{
+			// Special case:  x=4
+			b1 = b2;
+			b2 = b3;
+			a0 = a1;
+			a1 = a2;
+			a2 = a3;
+			if (q + s3 < e)
+				a3 = q[s3];
+			b3 = q[0] - ((((a1 + a2) << 3) + (a1 + a2) - a0 - a3 + 16) >> 5);
+			q[0] = b3;
+			q[-s3] = q[-s3] + ((b1 + b2 + 1) >> 1);
+			q += s + s;
+		}
+		while (q + s3 < e)
+		{
+			// Generic case
+			a0 = a1;
+			a1 = a2;
+			a2 = a3;
+			a3 = q[s3];
+			b0 = b1;
+			b1 = b2;
+			b2 = b3;
+			b3 = q[0] - ((((a1 + a2) << 3) + (a1 + a2) - a0 - a3 + 16) >> 5);
+			q[0] = b3;
+			q[-s3] = q[-s3] + ((((b1 + b2) << 3) + (b1 + b2) - b0 - b3 + 8) >> 4);
+			q += s + s;
+		}
+		while (q < e)
+		{
+			// Special case:  w-3 <= x < w
+			a0 = a1;
+			a1 = a2;
+			a2 = a3;
+			a3 = 0;
+			b0 = b1;
+			b1 = b2;
+			b2 = b3;
+			b3 = q[0] - ((((a1 + a2) << 3) + (a1 + a2) - a0 - a3 + 16) >> 5);
+			q[0] = b3;
+			q[-s3] = q[-s3] + ((((b1 + b2) << 3) + (b1 + b2) - b0 - b3 + 8) >> 4);
+			q += s + s;
+		}
+		while (q - s3 < e)
+		{
+			// Special case  w <= x < w+3
+			b0 = b1;
+			b1 = b2;
+			b2 = b3;
+			if (q - s3 >= p)
+				q[-s3] = q[-s3] + ((b1 + b2 + 1) >> 1);
+			q += s + s;
+		}
+		y += scale;
+		p += rowsize;
+	}
 }
 
 
@@ -546,9 +541,9 @@ static int zigzagloc[1024] = {
 
 struct IW44Image::Alloc // DJVU_CLASS
 {
-  Alloc *next;
-  short data[IWALLOCSIZE];
-  Alloc(Alloc *n);
+	Alloc *next;
+	short data[IWALLOCSIZE];
+	Alloc(Alloc *n);
 };
 
 //---------------------------------------------------------------
@@ -557,42 +552,42 @@ struct IW44Image::Alloc // DJVU_CLASS
 
 IW44Image::Block::Block(void)
 {
-  pdata[0] = pdata[1] = pdata[2] = pdata[3] = 0;
+	pdata[0] = pdata[1] = pdata[2] = pdata[3] = 0;
 }
 
-void 
+void
 IW44Image::Block::zero(int n)
 {
-  if (pdata[n>>4])
-    pdata[n>>4][n&15] = 0;
+	if (pdata[n >> 4])
+		pdata[n >> 4][n & 15] = 0;
 }
 
-void  
+void
 IW44Image::Block::read_liftblock(const short *coeff, IW44Image::Map *map)
 {
-  int n=0;
-  for (int n1=0; n1<64; n1++)
-    {
-      short *d = data(n1,map);
-      for (int n2=0; n2<16; n2++,n++)
-        d[n2] = coeff[zigzagloc[n]];
-    }
+	int n = 0;
+	for (int n1 = 0; n1 < 64; n1++)
+	{
+		short *d = data(n1, map);
+		for (int n2 = 0; n2 < 16; n2++, n++)
+			d[n2] = coeff[zigzagloc[n]];
+	}
 }
 
-void  
+void
 IW44Image::Block::write_liftblock(short *coeff, int bmin, int bmax) const
 {
-  int n = bmin<<4;
-  memset(coeff, 0, 1024*sizeof(short));
-  for (int n1=bmin; n1<bmax; n1++)
-    {
-      const short *d = data(n1);
-      if (d == 0)
-        n += 16;
-      else
-        for (int n2=0; n2<16; n2++,n++)
-          coeff[zigzagloc[n]] = d[n2];
-    }
+	int n = bmin << 4;
+	memset(coeff, 0, 1024 * sizeof(short));
+	for (int n1 = bmin; n1 < bmax; n1++)
+	{
+		const short *d = data(n1);
+		if (d == 0)
+			n += 16;
+		else
+			for (int n2 = 0; n2 < 16; n2++, n++)
+				coeff[zigzagloc[n]] = d[n2];
+	}
 }
 
 //---------------------------------------------------------------
@@ -600,282 +595,282 @@ IW44Image::Block::write_liftblock(short *coeff, int bmin, int bmax) const
 
 
 IW44Image::Map::Map(int w, int h)
-  :  blocks(0), iw(w), ih(h), chain(0)
+	: blocks(0), iw(w), ih(h), chain(0)
 {
-  bw = (w+0x20-1) & ~0x1f;
-  bh = (h+0x20-1) & ~0x1f;
-  nb = (bw * bh) / (32 * 32);
-  blocks = new IW44Image::Block[nb];
-  top = IWALLOCSIZE;
+	bw = (w + 0x20 - 1) & ~0x1f;
+	bh = (h + 0x20 - 1) & ~0x1f;
+	nb = (bw * bh) / (32 * 32);
+	blocks = new IW44Image::Block[nb];
+	top = IWALLOCSIZE;
 }
 
 IW44Image::Map::~Map()
 {
-  while (chain)
-    {
-      IW44Image::Alloc *next = chain->next;
-      delete chain;
-      chain = next;
-    }
-  delete [] blocks;
+	while (chain)
+	{
+		IW44Image::Alloc *next = chain->next;
+		delete chain;
+		chain = next;
+	}
+	delete[] blocks;
 }
 
 
 IW44Image::Alloc::Alloc(Alloc *n)
-  : next(n) 
-{ 
-  // see note in IW44Image::Map::alloc
-  memset(data, 0, sizeof(data)); 
+	: next(n)
+{
+	// see note in IW44Image::Map::alloc
+	memset(data, 0, sizeof(data));
 }
 
 short *
 IW44Image::Map::alloc(int n)
 {
-  if (top+n > IWALLOCSIZE)
-    {
-      // note: everything is cleared long before we use it
-      // in order to avoid the need for a memory fence.
-      chain = new IW44Image::Alloc(chain);
-      top = 0;
-    }
-  short *ans = chain->data + top;
-  top += n;
-  return ans;
+	if (top + n > IWALLOCSIZE)
+	{
+		// note: everything is cleared long before we use it
+		// in order to avoid the need for a memory fence.
+		chain = new IW44Image::Alloc(chain);
+		top = 0;
+	}
+	short *ans = chain->data + top;
+	top += n;
+	return ans;
 }
 
 short **
 IW44Image::Map::allocp(int n)
 {
-  // Allocate enough room for pointers plus alignment
-  short *p = alloc( (n+1) * sizeof(short*) / sizeof(short) );
-  // Align on pointer size
-  while ( ((size_t)p) & (sizeof(short*)-1) )
-    p += 1;
-  // Cast and return
-  return (short**)p;
+	// Allocate enough room for pointers plus alignment
+	short *p = alloc((n + 1) * sizeof(short*) / sizeof(short));
+	// Align on pointer size
+	while (((size_t)p) & (sizeof(short*) - 1))
+		p += 1;
+	// Cast and return
+	return (short**)p;
 }
 
-int 
+int
 IW44Image::Map::get_bucket_count(void) const
 {
-  int buckets = 0;
-  for (int blockno=0; blockno<nb; blockno++)
-    for (int buckno=0; buckno<64; buckno++)
-      if (blocks[blockno].data(buckno))
-        buckets += 1;
-  return buckets;
+	int buckets = 0;
+	for (int blockno = 0; blockno < nb; blockno++)
+		for (int buckno = 0; buckno < 64; buckno++)
+			if (blocks[blockno].data(buckno))
+				buckets += 1;
+	return buckets;
 }
 
-unsigned int 
+unsigned int
 IW44Image::Map::get_memory_usage(void) const
 {
-  unsigned int usage = sizeof(Map);
-  usage += sizeof(IW44Image::Block) * nb;
-  for (IW44Image::Alloc *n = chain; n; n=n->next)
-    usage += sizeof(IW44Image::Alloc);
-  return usage;
+	unsigned int usage = sizeof(Map);
+	usage += sizeof(IW44Image::Block) * nb;
+	for (IW44Image::Alloc *n = chain; n; n = n->next)
+		usage += sizeof(IW44Image::Alloc);
+	return usage;
 }
 
 
 
 
-void 
+void
 IW44Image::Map::image(signed char *img8, int rowsize, int pixsep, int fast)
 {
-  // Allocate reconstruction buffer
-  short *data16;
-  size_t sz = bw * bh;
-  if (sz / (size_t)bw != (size_t)bh) // multiplication overflow
-    G_THROW("IW44Image: image size exceeds maximum (corrupted file?)");
-  GPBuffer<short> gdata16(data16,sz);
-  // Copy coefficients
-  int i;
-  short *p = data16;
-  const IW44Image::Block *block = blocks;
-  for (i=0; i<bh; i+=32)
-    {
-      for (int j=0; j<bw; j+=32)
-        {
-          short liftblock[1024];
-          // transfer into IW44Image::Block (apply zigzag and scaling)
-          block->write_liftblock(liftblock);
-          block++;
-          // transfer into coefficient matrix at (p+j)
-          short *pp = p + j;
-          short *pl = liftblock;
-          for (int ii=0; ii<32; ii++, pp+=bw,pl+=32)
-            memcpy((void*)pp, (void*)pl, 32*sizeof(short));
-        }
-      // next row of blocks
-      p += 32*bw;
-    }
-  // Reconstruction
-  if (fast)
-    {
-      IW44Image::Transform::Decode::backward(data16, iw, ih, bw, 32, 2);  
-      p = data16;
-      for (i=0; i<bh; i+=2,p+=bw)
-        for (int jj=0; jj<bw; jj+=2,p+=2)
-          p[bw] = p[bw+1] = p[1] = p[0];
-    }
-  else
-    {
-      IW44Image::Transform::Decode::backward(data16, iw, ih, bw, 32, 1);  
-    }
-  // Copy result into image
-  p = data16;
-  signed char *row = img8;  
-  for (i=0; i<ih; i++)
-    {
-      signed char *pix = row;
-      for (int j=0; j<iw; j+=1,pix+=pixsep)
-        {
-          int x = (p[j] + iw_round) >> iw_shift;
-          if (x < -128)
-            x = -128;
-          else if (x > 127)
-            x = 127;
-          *pix = x;
-        }
-      row += rowsize;
-      p += bw;
-    }
+	// Allocate reconstruction buffer
+	short *data16;
+	size_t sz = bw * bh;
+	if (sz / (size_t)bw != (size_t)bh) // multiplication overflow
+		G_THROW("IW44Image: image size exceeds maximum (corrupted file?)");
+	GPBuffer<short> gdata16(data16, sz);
+	// Copy coefficients
+	int i;
+	short *p = data16;
+	const IW44Image::Block *block = blocks;
+	for (i = 0; i < bh; i += 32)
+	{
+		for (int j = 0; j < bw; j += 32)
+		{
+			short liftblock[1024];
+			// transfer into IW44Image::Block (apply zigzag and scaling)
+			block->write_liftblock(liftblock);
+			block++;
+			// transfer into coefficient matrix at (p+j)
+			short *pp = p + j;
+			short *pl = liftblock;
+			for (int ii = 0; ii < 32; ii++, pp += bw, pl += 32)
+				memcpy((void*)pp, (void*)pl, 32 * sizeof(short));
+		}
+		// next row of blocks
+		p += 32 * bw;
+	}
+	// Reconstruction
+	if (fast)
+	{
+		IW44Image::Transform::Decode::backward(data16, iw, ih, bw, 32, 2);
+		p = data16;
+		for (i = 0; i < bh; i += 2, p += bw)
+			for (int jj = 0; jj < bw; jj += 2, p += 2)
+				p[bw] = p[bw + 1] = p[1] = p[0];
+	}
+	else
+	{
+		IW44Image::Transform::Decode::backward(data16, iw, ih, bw, 32, 1);
+	}
+	// Copy result into image
+	p = data16;
+	signed char *row = img8;
+	for (i = 0; i < ih; i++)
+	{
+		signed char *pix = row;
+		for (int j = 0; j < iw; j += 1, pix += pixsep)
+		{
+			int x = (p[j] + iw_round) >> iw_shift;
+			if (x < -128)
+				x = -128;
+			else if (x > 127)
+				x = 127;
+			*pix = x;
+		}
+		row += rowsize;
+		p += bw;
+	}
 }
 
-void 
-IW44Image::Map::image(int subsample, const GRect &rect, 
-              signed char *img8, int rowsize, int pixsep, int fast)
+void
+IW44Image::Map::image(int subsample, const GRect &rect,
+	signed char *img8, int rowsize, int pixsep, int fast)
 {
-  int i;
-  // Compute number of decomposition levels
-  int nlevel = 0;
-  while (nlevel<5 && (32>>nlevel)>subsample)
-    nlevel += 1;
-  int boxsize = 1<<nlevel;
-  // Parameter check
-  if (subsample!=(32>>nlevel))
-    G_THROW( ERR_MSG("IW44Image.sample_factor") );
-  if (rect.isempty())
-    G_THROW( ERR_MSG("IW44Image.empty_rect") );    
-  GRect irect(0,0,(iw+subsample-1)/subsample,(ih+subsample-1)/subsample);
-  if (rect.xmin<0 || rect.ymin<0 || rect.xmax>irect.xmax || rect.ymax>irect.ymax)
-    G_THROW( ERR_MSG("IW44Image.bad_rect") );
-  // Multiresolution rectangles 
-  // -- needed[i] tells which coeffs are required for the next step
-  // -- recomp[i] tells which coeffs need to be computed at this level
-  GRect needed[8];
-  GRect recomp[8];
-  int r = 1;
-  needed[nlevel] = rect;
-  recomp[nlevel] = rect;
-  for (i=nlevel-1; i>=0; i--)
-    {
-      needed[i] = recomp[i+1];
-      needed[i].inflate(iw_border*r, iw_border*r);
-      needed[i].intersect(needed[i], irect);
-      r += r;
-      recomp[i].xmin = (needed[i].xmin + r-1) & ~(r-1);
-      recomp[i].xmax = (needed[i].xmax) & ~(r-1);
-      recomp[i].ymin = (needed[i].ymin + r-1) & ~(r-1);
-      recomp[i].ymax = (needed[i].ymax) & ~(r-1);
-    }
-  // Working rectangle
-  // -- a rectangle large enough to hold all the data
-  GRect work;
-  work.xmin = (needed[0].xmin) & ~(boxsize-1);
-  work.ymin = (needed[0].ymin) & ~(boxsize-1);
-  work.xmax = ((needed[0].xmax-1) & ~(boxsize-1) ) + boxsize;
-  work.ymax = ((needed[0].ymax-1) & ~(boxsize-1) ) + boxsize;
-  // -- allocate work buffer
-  int dataw = work.xmax - work.xmin;     // Note: cannot use inline width() or height()
-  int datah = work.ymax - work.ymin;     // because Intel C++ compiler optimizes it wrong !
-  short *data;
-  GPBuffer<short> gdata(data,dataw*datah);
-  // Fill working rectangle
-  // -- loop over liftblocks rows
-  short *ldata = data;
-  int blkw = (bw>>5);
-  const IW44Image::Block *lblock = blocks + (work.ymin>>nlevel)*blkw + (work.xmin>>nlevel);
-  for (int by=work.ymin; by<work.ymax; by+=boxsize)
-    {
-      // -- loop over liftblocks in row
-      const IW44Image::Block *block = lblock;
-      short *rdata = ldata;
-      for (int bx=work.xmin; bx<work.xmax; bx+=boxsize)        
-        {
-          // -- decide how much to load
-          int mlevel = nlevel;
-          if (nlevel>2)
-            if (bx+31<needed[2].xmin || bx>needed[2].xmax ||
-                by+31<needed[2].ymin || by>needed[2].ymax )
-              mlevel = 2;
-          int bmax   = ((1<<(mlevel+mlevel))+15)>>4;
-          int ppinc  = (1<<(nlevel-mlevel));
-          int ppmod1 = (dataw<<(nlevel-mlevel));
-          int ttmod0 = (32 >> mlevel);
-          int ttmod1 = (ttmod0 << 5);
-          // -- get current block
-          short liftblock[1024];
-          block->write_liftblock(liftblock, 0, bmax );
-          // -- copy liftblock into image
-          short *tt = liftblock;
-          short *pp = rdata;
-          for (int ii=0; ii<boxsize; ii+=ppinc,pp+=ppmod1,tt+=ttmod1-32)
-            for (int jj=0; jj<boxsize; jj+=ppinc,tt+=ttmod0)
-              pp[jj] = *tt;
-          // -- next block in row
-          rdata += boxsize;
-          block += 1;
-        }
-      // -- next row of blocks
-      ldata += dataw << nlevel;
-      lblock += blkw;
-    }
-  // Perform reconstruction
-  r = boxsize;
-  for (i=0; i<nlevel; i++)
-    {
-      GRect comp = needed[i];
-      comp.xmin = comp.xmin & ~(r-1);
-      comp.ymin = comp.ymin & ~(r-1);
-      comp.translate(-work.xmin, -work.ymin);
-      // Fast mode shortcuts finer resolution
-      if (fast && i>=4) 
-        {
-          short *pp = data + comp.ymin*dataw;
-          for (int ii=comp.ymin; ii<comp.ymax; ii+=2, pp+=dataw+dataw)
-            for (int jj=comp.xmin; jj<comp.xmax; jj+=2)
-              pp[jj+dataw] = pp[jj+dataw+1] = pp[jj+1] = pp[jj];
-          break;
-        }
-      else
-        {
-          short *pp = data + comp.ymin*dataw + comp.xmin;
-          IW44Image::Transform::Decode::backward(pp, comp.width(), comp.height(), dataw, r, r>>1);
-        }
-      r = r>>1;
-    }
-  // Copy result into image
-  GRect nrect = rect;
-  nrect.translate(-work.xmin, -work.ymin);
-  short *p = data + nrect.ymin*dataw;
-  signed char *row = img8;  
-  for (i=nrect.ymin; i<nrect.ymax; i++)
-    {
-      int j;
-      signed char *pix = row;
-      for (j=nrect.xmin; j<nrect.xmax; j+=1,pix+=pixsep)
-        {
-          int x = (p[j] + iw_round) >> iw_shift;
-          if (x < -128)
-            x = -128;
-          else if (x > 127)
-            x = 127;
-          *pix = x;
-        }
-      row += rowsize;
-      p += dataw;
-    }
+	int i;
+	// Compute number of decomposition levels
+	int nlevel = 0;
+	while (nlevel<5 && (32 >> nlevel)>subsample)
+		nlevel += 1;
+	int boxsize = 1 << nlevel;
+	// Parameter check
+	if (subsample != (32 >> nlevel))
+		G_THROW(ERR_MSG("IW44Image.sample_factor"));
+	if (rect.isempty())
+		G_THROW(ERR_MSG("IW44Image.empty_rect"));
+	GRect irect(0, 0, (iw + subsample - 1) / subsample, (ih + subsample - 1) / subsample);
+	if (rect.xmin<0 || rect.ymin<0 || rect.xmax>irect.xmax || rect.ymax>irect.ymax)
+		G_THROW(ERR_MSG("IW44Image.bad_rect"));
+	// Multiresolution rectangles 
+	// -- needed[i] tells which coeffs are required for the next step
+	// -- recomp[i] tells which coeffs need to be computed at this level
+	GRect needed[8];
+	GRect recomp[8];
+	int r = 1;
+	needed[nlevel] = rect;
+	recomp[nlevel] = rect;
+	for (i = nlevel - 1; i >= 0; i--)
+	{
+		needed[i] = recomp[i + 1];
+		needed[i].inflate(iw_border*r, iw_border*r);
+		needed[i].intersect(needed[i], irect);
+		r += r;
+		recomp[i].xmin = (needed[i].xmin + r - 1) & ~(r - 1);
+		recomp[i].xmax = (needed[i].xmax) & ~(r - 1);
+		recomp[i].ymin = (needed[i].ymin + r - 1) & ~(r - 1);
+		recomp[i].ymax = (needed[i].ymax) & ~(r - 1);
+	}
+	// Working rectangle
+	// -- a rectangle large enough to hold all the data
+	GRect work;
+	work.xmin = (needed[0].xmin) & ~(boxsize - 1);
+	work.ymin = (needed[0].ymin) & ~(boxsize - 1);
+	work.xmax = ((needed[0].xmax - 1) & ~(boxsize - 1)) + boxsize;
+	work.ymax = ((needed[0].ymax - 1) & ~(boxsize - 1)) + boxsize;
+	// -- allocate work buffer
+	int dataw = work.xmax - work.xmin;     // Note: cannot use inline width() or height()
+	int datah = work.ymax - work.ymin;     // because Intel C++ compiler optimizes it wrong !
+	short *data;
+	GPBuffer<short> gdata(data, dataw*datah);
+	// Fill working rectangle
+	// -- loop over liftblocks rows
+	short *ldata = data;
+	int blkw = (bw >> 5);
+	const IW44Image::Block *lblock = blocks + (work.ymin >> nlevel)*blkw + (work.xmin >> nlevel);
+	for (int by = work.ymin; by < work.ymax; by += boxsize)
+	{
+		// -- loop over liftblocks in row
+		const IW44Image::Block *block = lblock;
+		short *rdata = ldata;
+		for (int bx = work.xmin; bx < work.xmax; bx += boxsize)
+		{
+			// -- decide how much to load
+			int mlevel = nlevel;
+			if (nlevel > 2)
+				if (bx + 31 < needed[2].xmin || bx > needed[2].xmax ||
+					by + 31 < needed[2].ymin || by > needed[2].ymax)
+					mlevel = 2;
+			int bmax = ((1 << (mlevel + mlevel)) + 15) >> 4;
+			int ppinc = (1 << (nlevel - mlevel));
+			int ppmod1 = (dataw << (nlevel - mlevel));
+			int ttmod0 = (32 >> mlevel);
+			int ttmod1 = (ttmod0 << 5);
+			// -- get current block
+			short liftblock[1024];
+			block->write_liftblock(liftblock, 0, bmax);
+			// -- copy liftblock into image
+			short *tt = liftblock;
+			short *pp = rdata;
+			for (int ii = 0; ii < boxsize; ii += ppinc, pp += ppmod1, tt += ttmod1 - 32)
+				for (int jj = 0; jj < boxsize; jj += ppinc, tt += ttmod0)
+					pp[jj] = *tt;
+			// -- next block in row
+			rdata += boxsize;
+			block += 1;
+		}
+		// -- next row of blocks
+		ldata += dataw << nlevel;
+		lblock += blkw;
+	}
+	// Perform reconstruction
+	r = boxsize;
+	for (i = 0; i < nlevel; i++)
+	{
+		GRect comp = needed[i];
+		comp.xmin = comp.xmin & ~(r - 1);
+		comp.ymin = comp.ymin & ~(r - 1);
+		comp.translate(-work.xmin, -work.ymin);
+		// Fast mode shortcuts finer resolution
+		if (fast && i >= 4)
+		{
+			short *pp = data + comp.ymin*dataw;
+			for (int ii = comp.ymin; ii < comp.ymax; ii += 2, pp += dataw + dataw)
+				for (int jj = comp.xmin; jj < comp.xmax; jj += 2)
+					pp[jj + dataw] = pp[jj + dataw + 1] = pp[jj + 1] = pp[jj];
+			break;
+		}
+		else
+		{
+			short *pp = data + comp.ymin*dataw + comp.xmin;
+			IW44Image::Transform::Decode::backward(pp, comp.width(), comp.height(), dataw, r, r >> 1);
+		}
+		r = r >> 1;
+	}
+	// Copy result into image
+	GRect nrect = rect;
+	nrect.translate(-work.xmin, -work.ymin);
+	short *p = data + nrect.ymin*dataw;
+	signed char *row = img8;
+	for (i = nrect.ymin; i < nrect.ymax; i++)
+	{
+		int j;
+		signed char *pix = row;
+		for (j = nrect.xmin; j < nrect.xmax; j += 1, pix += pixsep)
+		{
+			int x = (p[j] + iw_round) >> iw_shift;
+			if (x < -128)
+				x = -128;
+			else if (x > 127)
+				x = 127;
+			*pix = x;
+		}
+		row += rowsize;
+		p += dataw;
+	}
 }
 
 
@@ -894,49 +889,49 @@ IW44Image::Map::image(int subsample, const GRect &rect,
 
 // Constant
 
-static const struct { int start; int size; }  
-bandbuckets[] = 
+static const struct { int start; int size; }
+bandbuckets[] =
 {
-  // Code first bucket and number of buckets in each band
-  { 0, 1 }, // -- band zero contains all lores info
-  { 1, 1 }, { 2, 1 }, { 3, 1 }, 
-  { 4, 4 }, { 8, 4 }, { 12,4 }, 
-  { 16,16 }, { 32,16 }, { 48,16 }, 
+	// Code first bucket and number of buckets in each band
+	{ 0, 1 }, // -- band zero contains all lores info
+	{ 1, 1 }, { 2, 1 }, { 3, 1 },
+	{ 4, 4 }, { 8, 4 }, { 12,4 },
+	{ 16,16 }, { 32,16 }, { 48,16 },
 };
 
 
 // IW44Image::Codec constructor
 
 IW44Image::Codec::Codec(IW44Image::Map &xmap)
-  : map(xmap), 
-    curband(0),
-    curbit(1)
+	: map(xmap),
+	curband(0),
+	curbit(1)
 {
-  // Initialize quantification
-  int  j;
-  int  i = 0;
-  const int *q = iw_quant;
-  // -- lo coefficients
-  for (j=0; i<4; j++)
-    quant_lo[i++] = *q++;
-  for (j=0; j<4; j++)
-    quant_lo[i++] = *q;
-  q += 1;
-  for (j=0; j<4; j++)
-    quant_lo[i++] = *q;
-  q += 1;
-  for (j=0; j<4; j++)
-    quant_lo[i++] = *q;
-  q += 1;
-  // -- hi coefficients
-  quant_hi[0] = 0;
-  for (j=1; j<10; j++)
-    quant_hi[j] = *q++;
-  // Initialize coding contexts
-  memset((void*)ctxStart, 0, sizeof(ctxStart));
-  memset((void*)ctxBucket, 0, sizeof(ctxBucket));
-  ctxMant = 0;
-  ctxRoot = 0;
+	// Initialize quantification
+	int  j;
+	int  i = 0;
+	const int *q = iw_quant;
+	// -- lo coefficients
+	for (j = 0; i < 4; j++)
+		quant_lo[i++] = *q++;
+	for (j = 0; j < 4; j++)
+		quant_lo[i++] = *q;
+	q += 1;
+	for (j = 0; j < 4; j++)
+		quant_lo[i++] = *q;
+	q += 1;
+	for (j = 0; j < 4; j++)
+		quant_lo[i++] = *q;
+	q += 1;
+	// -- hi coefficients
+	quant_hi[0] = 0;
+	for (j = 1; j < 10; j++)
+		quant_hi[j] = *q++;
+	// Initialize coding contexts
+	memset((void*)ctxStart, 0, sizeof(ctxStart));
+	memset((void*)ctxBucket, 0, sizeof(ctxBucket));
+	ctxMant = 0;
+	ctxRoot = 0;
 }
 
 
@@ -948,29 +943,29 @@ IW44Image::Codec::~Codec() {}
 // -- check if data can be produced for this band/mask
 // -- also fills the sure_zero array
 
-int 
+int
 IW44Image::Codec::is_null_slice(int bit, int band)
 {
-  if (band == 0)
-    {
-      int is_null = 1;
-      for (int i=0; i<16; i++) 
-        {
-          int threshold = quant_lo[i];
-          coeffstate[i] = ZERO;
-          if (threshold>0 && threshold<0x8000)
-            {
-              coeffstate[i] = UNK;
-              is_null = 0;
-            }
-        }
-      return is_null;
-    }
-  else
-    {
-      int threshold = quant_hi[band];
-      return (! (threshold>0 && threshold<0x8000));
-    }
+	if (band == 0)
+	{
+		int is_null = 1;
+		for (int i = 0; i < 16; i++)
+		{
+			int threshold = quant_lo[i];
+			coeffstate[i] = ZERO;
+			if (threshold > 0 && threshold < 0x8000)
+			{
+				coeffstate[i] = UNK;
+				is_null = 0;
+			}
+		}
+		return is_null;
+	}
+	else
+	{
+		int threshold = quant_hi[band];
+		return (!(threshold > 0 && threshold < 0x8000));
+	}
 }
 
 
@@ -980,22 +975,22 @@ IW44Image::Codec::is_null_slice(int bit, int band)
 int
 IW44Image::Codec::Decode::code_slice(ZPCodec &zp)
 {
-  // Check that code_slice can still run
-  if (curbit < 0)
-    return 0;
-  // Perform coding
-  if (! is_null_slice(curbit, curband))
-    {
-      for (int blockno=0; blockno<map.nb; blockno++)
-        {
-          int fbucket = bandbuckets[curband].start;
-          int nbucket = bandbuckets[curband].size;
-          decode_buckets(zp, curbit, curband, 
-                           map.blocks[blockno], 
-                           fbucket, nbucket);
-        }
-    }
-  return finish_code_slice(zp);
+	// Check that code_slice can still run
+	if (curbit < 0)
+		return 0;
+	// Perform coding
+	if (!is_null_slice(curbit, curband))
+	{
+		for (int blockno = 0; blockno < map.nb; blockno++)
+		{
+			int fbucket = bandbuckets[curband].start;
+			int nbucket = bandbuckets[curband].size;
+			decode_buckets(zp, curbit, curband,
+				map.blocks[blockno],
+				fbucket, nbucket);
+		}
+	}
+	return finish_code_slice(zp);
 }
 
 // code_slice
@@ -1004,24 +999,24 @@ IW44Image::Codec::Decode::code_slice(ZPCodec &zp)
 int
 IW44Image::Codec::finish_code_slice(ZPCodec &zp)
 {
-  // Reduce quantization threshold
-  quant_hi[curband] = quant_hi[curband] >> 1;
-  if (curband == 0)
-    for (int i=0; i<16; i++) 
-      quant_lo[i] = quant_lo[i] >> 1;
-  // Proceed to the next slice
-  if (++curband >= (int)(sizeof(bandbuckets)/sizeof(bandbuckets[0])))
-    {
-      curband = 0;
-      curbit += 1;
-      if (quant_hi[(sizeof(bandbuckets)/sizeof(bandbuckets[0]))-1] == 0)
-        {
-          // All quantization thresholds are null
-          curbit = -1;
-          return 0;
-        }
-    }
-  return 1;
+	// Reduce quantization threshold
+	quant_hi[curband] = quant_hi[curband] >> 1;
+	if (curband == 0)
+		for (int i = 0; i < 16; i++)
+			quant_lo[i] = quant_lo[i] >> 1;
+	// Proceed to the next slice
+	if (++curband >= (int)(sizeof(bandbuckets) / sizeof(bandbuckets[0])))
+	{
+		curband = 0;
+		curbit += 1;
+		if (quant_hi[(sizeof(bandbuckets) / sizeof(bandbuckets[0])) - 1] == 0)
+		{
+			// All quantization thresholds are null
+			curbit = -1;
+			return 0;
+		}
+	}
+	return 1;
 }
 
 // decode_prepare
@@ -1029,63 +1024,63 @@ IW44Image::Codec::finish_code_slice(ZPCodec &zp)
 
 int
 IW44Image::Codec::decode_prepare(int fbucket, int nbucket, IW44Image::Block &blk)
-{  
-  int bbstate = 0;
-  char *cstate = coeffstate;
-  if (fbucket)
-    {
-      // Band other than zero
-      for (int buckno=0; buckno<nbucket; buckno++, cstate+=16)
-        {
-          int bstatetmp = 0;
-          const short *pcoeff = blk.data(fbucket+buckno);
-          if (! pcoeff)
-            {
-              // cstate[0..15] will be filled later
-              bstatetmp = UNK;
-            }
-          else
-            {
-              for (int i=0; i<16; i++)
-                {
-                  int cstatetmp = UNK;
-                  if (pcoeff[i])
-                    cstatetmp = ACTIVE;
-                  cstate[i] = cstatetmp;
-                  bstatetmp |= cstatetmp;
-                }
-            }
-          bucketstate[buckno] = bstatetmp;
-          bbstate |= bstatetmp;
-        }
-    }
-  else
-    {
-      // Band zero ( fbucket==0 implies band==zero and nbucket==1 )
-      const short *pcoeff = blk.data(0);
-      if (! pcoeff)
-        {
-          // cstate[0..15] will be filled later
-          bbstate = UNK;      
-        }
-      else
-        {
-          for (int i=0; i<16; i++)
-            {
-              int cstatetmp = cstate[i];
-              if (cstatetmp != ZERO)
-                {
-                  cstatetmp = UNK;
-                  if (pcoeff[i])
-                    cstatetmp = ACTIVE;
-                }
-              cstate[i] = cstatetmp;
-              bbstate |= cstatetmp;
-            }
-        }
-      bucketstate[0] = bbstate;
-    }
-  return bbstate;
+{
+	int bbstate = 0;
+	char *cstate = coeffstate;
+	if (fbucket)
+	{
+		// Band other than zero
+		for (int buckno = 0; buckno < nbucket; buckno++, cstate += 16)
+		{
+			int bstatetmp = 0;
+			const short *pcoeff = blk.data(fbucket + buckno);
+			if (!pcoeff)
+			{
+				// cstate[0..15] will be filled later
+				bstatetmp = UNK;
+			}
+			else
+			{
+				for (int i = 0; i < 16; i++)
+				{
+					int cstatetmp = UNK;
+					if (pcoeff[i])
+						cstatetmp = ACTIVE;
+					cstate[i] = cstatetmp;
+					bstatetmp |= cstatetmp;
+				}
+			}
+			bucketstate[buckno] = bstatetmp;
+			bbstate |= bstatetmp;
+		}
+	}
+	else
+	{
+		// Band zero ( fbucket==0 implies band==zero and nbucket==1 )
+		const short *pcoeff = blk.data(0);
+		if (!pcoeff)
+		{
+			// cstate[0..15] will be filled later
+			bbstate = UNK;
+		}
+		else
+		{
+			for (int i = 0; i < 16; i++)
+			{
+				int cstatetmp = cstate[i];
+				if (cstatetmp != ZERO)
+				{
+					cstatetmp = UNK;
+					if (pcoeff[i])
+						cstatetmp = ACTIVE;
+				}
+				cstate[i] = cstatetmp;
+				bbstate |= cstatetmp;
+			}
+		}
+		bucketstate[0] = bbstate;
+	}
+	return bbstate;
 }
 
 
@@ -1093,189 +1088,189 @@ IW44Image::Codec::decode_prepare(int fbucket, int nbucket, IW44Image::Block &blk
 // -- code a sequence of buckets in a given block
 
 void
-IW44Image::Codec::decode_buckets(ZPCodec &zp, int bit, int band, 
-                         IW44Image::Block &blk,
-                         int fbucket, int nbucket)
+IW44Image::Codec::decode_buckets(ZPCodec &zp, int bit, int band,
+	IW44Image::Block &blk,
+	int fbucket, int nbucket)
 {
-  // compute state of all coefficients in all buckets
-  int bbstate = decode_prepare(fbucket, nbucket, blk);
-  // code root bit
-  if ((nbucket<16) || (bbstate&ACTIVE))
-    {
-      bbstate |= NEW;
-    }
-  else if (bbstate & UNK)
-    {
-      if (zp.decoder(ctxRoot))
-        bbstate |= NEW;
+	// compute state of all coefficients in all buckets
+	int bbstate = decode_prepare(fbucket, nbucket, blk);
+	// code root bit
+	if ((nbucket < 16) || (bbstate&ACTIVE))
+	{
+		bbstate |= NEW;
+	}
+	else if (bbstate & UNK)
+	{
+		if (zp.decoder(ctxRoot))
+			bbstate |= NEW;
 #ifdef TRACE
-      DjVuPrintMessage("bbstate[bit=%d,band=%d] = %d\n", bit, band, bbstate);
+		DjVuPrintMessage("bbstate[bit=%d,band=%d] = %d\n", bit, band, bbstate);
 #endif
-    }
-  
-  // code bucket bits
-  if (bbstate & NEW)
-    for (int buckno=0; buckno<nbucket; buckno++)
-      {
-        // Code bucket bit
-        if (bucketstate[buckno] & UNK)
-          {
-            // Context
-            int ctx = 0;
+	}
+
+	// code bucket bits
+	if (bbstate & NEW)
+		for (int buckno = 0; buckno < nbucket; buckno++)
+		{
+			// Code bucket bit
+			if (bucketstate[buckno] & UNK)
+			{
+				// Context
+				int ctx = 0;
 #ifndef NOCTX_BUCKET_UPPER
-            if (band>0)
-              {
-                int k = (fbucket+buckno)<<2;
-                const short *b = blk.data(k>>4);
-                if (b)
-                  {
-                    k = k & 0xf;
-                    if (b[k])
-                      ctx += 1;
-                    if (b[k+1])
-                      ctx += 1;
-                    if (b[k+2])
-                      ctx += 1;
-                    if (ctx<3 && b[k+3])
-                      ctx += 1;
-                  }
-              }
+				if (band > 0)
+				{
+					int k = (fbucket + buckno) << 2;
+					const short *b = blk.data(k >> 4);
+					if (b)
+					{
+						k = k & 0xf;
+						if (b[k])
+							ctx += 1;
+						if (b[k + 1])
+							ctx += 1;
+						if (b[k + 2])
+							ctx += 1;
+						if (ctx < 3 && b[k + 3])
+							ctx += 1;
+					}
+				}
 #endif // NOCTX_BUCKET_UPPER
 #ifndef NOCTX_BUCKET_ACTIVE
-            if (bbstate & ACTIVE)
-              ctx |= 4; 
+				if (bbstate & ACTIVE)
+					ctx |= 4;
 #endif
-            // Code
-            if (zp.decoder( ctxBucket[band][ctx] ))
-              bucketstate[buckno] |= NEW;
+				// Code
+				if (zp.decoder(ctxBucket[band][ctx]))
+					bucketstate[buckno] |= NEW;
 #ifdef TRACE
-            DjVuPrintMessage("  bucketstate[bit=%d,band=%d,buck=%d] = %d\n", 
-                   bit, band, buckno, bucketstate[buckno]);
+				DjVuPrintMessage("  bucketstate[bit=%d,band=%d,buck=%d] = %d\n",
+					bit, band, buckno, bucketstate[buckno]);
 #endif
-          }
-      }
+			}
+		}
 
-  // code new active coefficient (with their sign)
-  if (bbstate & NEW)
-    {
-      int thres = quant_hi[band];
-      char *cstate = coeffstate;
-      for (int buckno=0; buckno<nbucket; buckno++, cstate+=16)
-        if (bucketstate[buckno] & NEW)
-          {
-            int i;
-            short *pcoeff = (short*)blk.data(fbucket+buckno);
-            if (!pcoeff)
-              {
-                pcoeff = blk.data(fbucket+buckno, &map);
-                // time to fill cstate[0..15]
-                if (fbucket == 0) // band zero
-                  {
-                    for (i=0; i<16; i++)
-                      if (cstate[i] != ZERO)
-                        cstate[i] = UNK;
-                  }
-                else
-                  {
-                    for (i=0; i<16; i++)
-                      cstate[i] = UNK;
-                  }
-              }
+	// code new active coefficient (with their sign)
+	if (bbstate & NEW)
+	{
+		int thres = quant_hi[band];
+		char *cstate = coeffstate;
+		for (int buckno = 0; buckno < nbucket; buckno++, cstate += 16)
+			if (bucketstate[buckno] & NEW)
+			{
+				int i;
+				short *pcoeff = (short*)blk.data(fbucket + buckno);
+				if (!pcoeff)
+				{
+					pcoeff = blk.data(fbucket + buckno, &map);
+					// time to fill cstate[0..15]
+					if (fbucket == 0) // band zero
+					{
+						for (i = 0; i < 16; i++)
+							if (cstate[i] != ZERO)
+								cstate[i] = UNK;
+					}
+					else
+					{
+						for (i = 0; i < 16; i++)
+							cstate[i] = UNK;
+					}
+				}
 #ifndef NOCTX_EXPECT
-            int gotcha = 0;
-            const int maxgotcha = 7;
-            for (i=0; i<16; i++)
-              if (cstate[i] & UNK)
-                gotcha += 1;
+				int gotcha = 0;
+				const int maxgotcha = 7;
+				for (i = 0; i < 16; i++)
+					if (cstate[i] & UNK)
+						gotcha += 1;
 #endif
-            for (i=0; i<16; i++)
-              {
-                if (cstate[i] & UNK)
-                  {
-                    // find lores threshold
-                    if (band == 0)
-                      thres = quant_lo[i];
-                    // prepare context
-                    int ctx = 0;
+				for (i = 0; i < 16; i++)
+				{
+					if (cstate[i] & UNK)
+					{
+						// find lores threshold
+						if (band == 0)
+							thres = quant_lo[i];
+						// prepare context
+						int ctx = 0;
 #ifndef NOCTX_EXPECT
-                    if (gotcha>=maxgotcha)
-                      ctx = maxgotcha;
-                    else
-                      ctx = gotcha;
+						if (gotcha >= maxgotcha)
+							ctx = maxgotcha;
+						else
+							ctx = gotcha;
 #endif
 #ifndef NOCTX_ACTIVE
-                    if (bucketstate[buckno] & ACTIVE)
-                      ctx |= 8;
+						if (bucketstate[buckno] & ACTIVE)
+							ctx |= 8;
 #endif
-                    // code difference bit
-                    if (zp.decoder( ctxStart[ctx] ))
-                      {
-                        cstate[i] |= NEW;
-                        int halfthres = thres>>1;
-                        int coeff = thres+halfthres-(halfthres>>2);
-                        if (zp.IWdecoder())
-                          pcoeff[i] = -coeff;
-                        else
-                          pcoeff[i] = coeff;
-                      }
+						// code difference bit
+						if (zp.decoder(ctxStart[ctx]))
+						{
+							cstate[i] |= NEW;
+							int halfthres = thres >> 1;
+							int coeff = thres + halfthres - (halfthres >> 2);
+							if (zp.IWdecoder())
+								pcoeff[i] = -coeff;
+							else
+								pcoeff[i] = coeff;
+						}
 #ifndef NOCTX_EXPECT
-                    if (cstate[i] & NEW)
-                      gotcha = 0;
-                    else if (gotcha > 0)
-                      gotcha -= 1;
+						if (cstate[i] & NEW)
+							gotcha = 0;
+						else if (gotcha > 0)
+							gotcha -= 1;
 #endif
 #ifdef TRACE
-                    DjVuPrintMessage("    coeffstate[bit=%d,band=%d,buck=%d,c=%d] = %d\n", 
-                           bit, band, buckno, i, cstate[i]);
+						DjVuPrintMessage("    coeffstate[bit=%d,band=%d,buck=%d,c=%d] = %d\n",
+							bit, band, buckno, i, cstate[i]);
 #endif
-                  }
-              }
-          }
-    }
-  
-  // code mantissa bits
-  if (bbstate & ACTIVE)
-    {
-      int thres = quant_hi[band];
-      char *cstate = coeffstate;
-      for (int buckno=0; buckno<nbucket; buckno++, cstate+=16)
-        if (bucketstate[buckno] & ACTIVE)
-          {
-            short *pcoeff = (short*)blk.data(fbucket+buckno);
-            for (int i=0; i<16; i++)
-              if (cstate[i] & ACTIVE)
-                {
-                  int coeff = pcoeff[i];
-                  if (coeff < 0)
-                    coeff = -coeff;
-                  // find lores threshold
-                  if (band == 0)
-                    thres = quant_lo[i];
-                  // adjust coefficient
-                  if (coeff <= 3*thres)
-                    {
-                      // second mantissa bit
-                      coeff = coeff + (thres>>2);
-                      if (zp.decoder(ctxMant))
-                        coeff = coeff + (thres>>1);
-                      else
-                        coeff = coeff - thres + (thres>>1);
-                    }
-                  else
-                    {
-                      if (zp.IWdecoder())
-                        coeff = coeff + (thres>>1);
-                      else
-                        coeff = coeff - thres + (thres>>1);
-                    }
-                  // store coefficient
-                  if (pcoeff[i] > 0)
-                    pcoeff[i] = coeff;
-                  else
-                    pcoeff[i] = -coeff;
-                }
-          }
-    }
+					}
+				}
+			}
+	}
+
+	// code mantissa bits
+	if (bbstate & ACTIVE)
+	{
+		int thres = quant_hi[band];
+		char *cstate = coeffstate;
+		for (int buckno = 0; buckno < nbucket; buckno++, cstate += 16)
+			if (bucketstate[buckno] & ACTIVE)
+			{
+				short *pcoeff = (short*)blk.data(fbucket + buckno);
+				for (int i = 0; i < 16; i++)
+					if (cstate[i] & ACTIVE)
+					{
+						int coeff = pcoeff[i];
+						if (coeff < 0)
+							coeff = -coeff;
+						// find lores threshold
+						if (band == 0)
+							thres = quant_lo[i];
+						// adjust coefficient
+						if (coeff <= 3 * thres)
+						{
+							// second mantissa bit
+							coeff = coeff + (thres >> 2);
+							if (zp.decoder(ctxMant))
+								coeff = coeff + (thres >> 1);
+							else
+								coeff = coeff - thres + (thres >> 1);
+						}
+						else
+						{
+							if (zp.IWdecoder())
+								coeff = coeff + (thres >> 1);
+							else
+								coeff = coeff - thres + (thres >> 1);
+						}
+						// store coefficient
+						if (pcoeff[i] > 0)
+							pcoeff[i] = coeff;
+						else
+							pcoeff[i] = -coeff;
+					}
+			}
+	}
 }
 
 
@@ -1290,7 +1285,7 @@ IW44Image::Codec::decode_buckets(ZPCodec &zp, int bit, int band,
 static inline int
 min(const int x, const int y)
 {
-  return (x <= y) ? x : y;
+	return (x <= y) ? x : y;
 }
 
 #ifdef max
@@ -1299,34 +1294,34 @@ min(const int x, const int y)
 static inline int
 max(const int x, const int y)
 {
-  return (y <= x) ? x : y;
+	return (y <= x) ? x : y;
 }
 
 
-void 
+void
 IW44Image::PrimaryHeader::decode(GP<ByteStream> gbs)
 {
-  serial = gbs->read8();
-  slices = gbs->read8();
+	serial = gbs->read8();
+	slices = gbs->read8();
 }
 
-void 
+void
 IW44Image::SecondaryHeader::decode(GP<ByteStream> gbs)
 {
-  major = gbs->read8();
-  minor = gbs->read8();
+	major = gbs->read8();
+	minor = gbs->read8();
 }
 
-void 
+void
 IW44Image::TertiaryHeader::decode(GP<ByteStream> gbs, int major, int minor)
 {
-  xhi = gbs->read8();
-  xlo = gbs->read8();
-  yhi = gbs->read8();
-  ylo = gbs->read8();
-  crcbdelay = 0;
-  if (major== 1 && minor>=2)
-    crcbdelay = gbs->read8();
+	xhi = gbs->read8();
+	xlo = gbs->read8();
+	yhi = gbs->read8();
+	ylo = gbs->read8();
+	crcbdelay = 0;
+	if (major == 1 && minor >= 2)
+		crcbdelay = gbs->read8();
 }
 
 
@@ -1336,74 +1331,74 @@ IW44Image::TertiaryHeader::decode(GP<ByteStream> gbs, int major, int minor)
 //////////////////////////////////////////////////////
 
 IW44Image::IW44Image(void)
-  : db_frac(1.0),
-    ymap(0), cbmap(0), crmap(0),
-    cslice(0), cserial(0), cbytes(0)
+	: db_frac(1.0),
+	ymap(0), cbmap(0), crmap(0),
+	cslice(0), cserial(0), cbytes(0)
 {}
 
 IW44Image::~IW44Image()
 {
-  delete ymap;
-  delete cbmap;
-  delete crmap;
+	delete ymap;
+	delete cbmap;
+	delete crmap;
 }
 
 GP<IW44Image>
 IW44Image::create_decode(const ImageType itype)
 {
-  switch(itype)
-  {
-  case COLOR:
-    return new IWPixmap();
-  case GRAY:
-    return new IWBitmap();
-  default:
-    return 0;
-  }
+	switch (itype)
+	{
+	case COLOR:
+		return new IWPixmap();
+	case GRAY:
+		return new IWBitmap();
+	default:
+		return 0;
+	}
 }
 
 int
 IW44Image::encode_chunk(GP<ByteStream>, const IWEncoderParms &)
 {
-  G_THROW( ERR_MSG("IW44Image.codec_open2") );
-  return 0;
+	G_THROW(ERR_MSG("IW44Image.codec_open2"));
+	return 0;
 }
 
-void 
+void
 IW44Image::encode_iff(IFFByteStream &, int nchunks, const IWEncoderParms *)
 {
-  G_THROW( ERR_MSG("IW44Image.codec_open2") );
+	G_THROW(ERR_MSG("IW44Image.codec_open2"));
 }
 
-  
-void 
+
+void
 IWBitmap::close_codec(void)
 {
-  delete ycodec;
-  ycodec = 0;
-  cslice = cbytes = cserial = 0;
+	delete ycodec;
+	ycodec = 0;
+	cslice = cbytes = cserial = 0;
 }
 
-void 
+void
 IWPixmap::close_codec(void)
 {
-  delete ycodec;
-  delete cbcodec;
-  delete crcodec;
-  ycodec = crcodec = cbcodec = 0;
-  cslice = cbytes = cserial = 0;
+	delete ycodec;
+	delete cbcodec;
+	delete crcodec;
+	ycodec = crcodec = cbcodec = 0;
+	cslice = cbytes = cserial = 0;
 }
 
-int 
+int
 IW44Image::get_width(void) const
 {
-  return (ymap)?(ymap->iw):0;
+	return (ymap) ? (ymap->iw) : 0;
 }
 
-int 
+int
 IW44Image::get_height(void) const
 {
-  return (ymap)?(ymap->ih):0;
+	return (ymap) ? (ymap->ih) : 0;
 }
 
 
@@ -1411,172 +1406,172 @@ IW44Image::get_height(void) const
 // CLASS IWBITMAP
 //////////////////////////////////////////////////////
 
-IWBitmap::IWBitmap(void )
-: IW44Image(), ycodec(0)
+IWBitmap::IWBitmap(void)
+	: IW44Image(), ycodec(0)
 {}
 
 IWBitmap::~IWBitmap()
 {
-  close_codec();
+	close_codec();
 }
 
 int
 IWBitmap::get_percent_memory(void) const
 {
-  int buckets = 0;
-  int maximum = 0;
-  if (ymap) 
-    {
-      buckets += ymap->get_bucket_count();
-      maximum += 64 * ymap->nb;
-    }
-  return 100*buckets/ (maximum ? maximum : 1);
+	int buckets = 0;
+	int maximum = 0;
+	if (ymap)
+	{
+		buckets += ymap->get_bucket_count();
+		maximum += 64 * ymap->nb;
+	}
+	return 100 * buckets / (maximum ? maximum : 1);
 }
 
 unsigned int
 IWBitmap::get_memory_usage(void) const
 {
-  unsigned int usage = sizeof(GBitmap);
-  if (ymap)
-    usage += ymap->get_memory_usage();
-  return usage;
+	unsigned int usage = sizeof(GBitmap);
+	if (ymap)
+		usage += ymap->get_memory_usage();
+	return usage;
 }
 
 
-GP<GBitmap> 
+GP<GBitmap>
 IWBitmap::get_bitmap(void)
 {
-  // Check presence of data
-  if (ymap == 0)
-    return 0;
-  // Perform wavelet reconstruction
-  int w = ymap->iw;
-  int h = ymap->ih;
-  GP<GBitmap> pbm = GBitmap::create(h, w);
-  ymap->image((signed char*)(*pbm)[0],pbm->rowsize());
-  // Shift image data
-  for (int i=0; i<h; i++)
-    {
-      unsigned char *urow = (*pbm)[i];
-      signed char *srow = (signed char*)urow;
-      for (int j=0; j<w; j++)
-        urow[j] = (int)(srow[j]) + 128;
-    }
-  pbm->set_grays(256);
-  return pbm;
+	// Check presence of data
+	if (ymap == 0)
+		return 0;
+	// Perform wavelet reconstruction
+	int w = ymap->iw;
+	int h = ymap->ih;
+	GP<GBitmap> pbm = GBitmap::create(h, w);
+	ymap->image((signed char*)(*pbm)[0], pbm->rowsize());
+	// Shift image data
+	for (int i = 0; i < h; i++)
+	{
+		unsigned char *urow = (*pbm)[i];
+		signed char *srow = (signed char*)urow;
+		for (int j = 0; j < w; j++)
+			urow[j] = (int)(srow[j]) + 128;
+	}
+	pbm->set_grays(256);
+	return pbm;
 }
 
 
 GP<GBitmap>
 IWBitmap::get_bitmap(int subsample, const GRect &rect)
 {
-  if (ymap == 0)
-    return 0;
-  // Allocate bitmap
-  int w = rect.width();
-  int h = rect.height();
-  GP<GBitmap> pbm = GBitmap::create(h,w);
-  ymap->image(subsample, rect, (signed char*)(*pbm)[0],pbm->rowsize());
-  // Shift image data
-  for (int i=0; i<h; i++)
-    {
-      unsigned char *urow = (*pbm)[i];
-      signed char *srow = (signed char*)urow;
-      for (int j=0; j<w; j++)
-        urow[j] = (int)(srow[j]) + 128;
-    }
-  pbm->set_grays(256);
-  return pbm;
+	if (ymap == 0)
+		return 0;
+	// Allocate bitmap
+	int w = rect.width();
+	int h = rect.height();
+	GP<GBitmap> pbm = GBitmap::create(h, w);
+	ymap->image(subsample, rect, (signed char*)(*pbm)[0], pbm->rowsize());
+	// Shift image data
+	for (int i = 0; i < h; i++)
+	{
+		unsigned char *urow = (*pbm)[i];
+		signed char *srow = (signed char*)urow;
+		for (int j = 0; j < w; j++)
+			urow[j] = (int)(srow[j]) + 128;
+	}
+	pbm->set_grays(256);
+	return pbm;
 }
 
 
 int
 IWBitmap::decode_chunk(GP<ByteStream> gbs)
 {
-  // Open
-  if (! ycodec)
-  {
-    cslice = cserial = 0;
-    delete ymap;
-    ymap = 0;
-  }
-  // Read primary header
-  struct IW44Image::PrimaryHeader primary;
-  primary.decode(gbs);
-  if (primary.serial != cserial)
-    G_THROW( ERR_MSG("IW44Image.wrong_serial") );
-  int nslices = cslice + primary.slices;
-  // Read auxilliary headers
-  if (cserial == 0)
-    {
-      struct IW44Image::SecondaryHeader secondary;
-      secondary.decode(gbs);
-      if ((secondary.major & 0x7f) != IWCODEC_MAJOR)
-        G_THROW( ERR_MSG("IW44Image.incompat_codec") );
-      if (secondary.minor > IWCODEC_MINOR)
-        G_THROW( ERR_MSG("IW44Image.recent_codec") );
-      // Read tertiary header
-      struct IW44Image::TertiaryHeader tertiary;
-      tertiary.decode(gbs, secondary.major & 0x7f, secondary.minor);
-      if (! (secondary.major & 0x80))
-        G_THROW( ERR_MSG("IW44Image.has_color") );
-      // Create ymap and ycodec
-      int w = (tertiary.xhi << 8) | tertiary.xlo;
-      int h = (tertiary.yhi << 8) | tertiary.ylo;
-      assert(! ymap);
-      ymap = new Map(w, h);
-      assert(! ycodec);
-      ycodec = new Codec::Decode(*ymap);
-    }
-  // Read data
-  assert(ymap);
-  assert(ycodec);
-  GP<ZPCodec> gzp=ZPCodec::create(gbs, false, true);
-  ZPCodec &zp=*gzp;
-  int flag = 1;
-  while (flag && cslice<nslices)
-    {
-      flag = ycodec->code_slice(zp);
-      cslice++;
-    }
-  // Return
-  cserial += 1;
-  return nslices;
+	// Open
+	if (!ycodec)
+	{
+		cslice = cserial = 0;
+		delete ymap;
+		ymap = 0;
+	}
+	// Read primary header
+	struct IW44Image::PrimaryHeader primary;
+	primary.decode(gbs);
+	if (primary.serial != cserial)
+		G_THROW(ERR_MSG("IW44Image.wrong_serial"));
+	int nslices = cslice + primary.slices;
+	// Read auxilliary headers
+	if (cserial == 0)
+	{
+		struct IW44Image::SecondaryHeader secondary;
+		secondary.decode(gbs);
+		if ((secondary.major & 0x7f) != IWCODEC_MAJOR)
+			G_THROW(ERR_MSG("IW44Image.incompat_codec"));
+		if (secondary.minor > IWCODEC_MINOR)
+			G_THROW(ERR_MSG("IW44Image.recent_codec"));
+		// Read tertiary header
+		struct IW44Image::TertiaryHeader tertiary;
+		tertiary.decode(gbs, secondary.major & 0x7f, secondary.minor);
+		if (!(secondary.major & 0x80))
+			G_THROW(ERR_MSG("IW44Image.has_color"));
+		// Create ymap and ycodec
+		int w = (tertiary.xhi << 8) | tertiary.xlo;
+		int h = (tertiary.yhi << 8) | tertiary.ylo;
+		assert(!ymap);
+		ymap = new Map(w, h);
+		assert(!ycodec);
+		ycodec = new Codec::Decode(*ymap);
+	}
+	// Read data
+	assert(ymap);
+	assert(ycodec);
+	GP<ZPCodec> gzp = ZPCodec::create(gbs, false, true);
+	ZPCodec &zp = *gzp;
+	int flag = 1;
+	while (flag && cslice < nslices)
+	{
+		flag = ycodec->code_slice(zp);
+		cslice++;
+	}
+	// Return
+	cserial += 1;
+	return nslices;
 }
 
-void 
+void
 IWBitmap::parm_dbfrac(float frac)
 {
-  if (frac>0 && frac<=1)
-    db_frac = frac;
-  else
-    G_THROW( ERR_MSG("IW44Image.param_range") );
+	if (frac > 0 && frac <= 1)
+		db_frac = frac;
+	else
+		G_THROW(ERR_MSG("IW44Image.param_range"));
 }
 
 
-int 
+int
 IWBitmap::get_serial(void)
 {
-  return cserial;
+	return cserial;
 }
 
-void 
+void
 IWBitmap::decode_iff(IFFByteStream &iff, int maxchunks)
 {
-  if (ycodec)
-    G_THROW( ERR_MSG("IW44Image.left_open2") );
-  GUTF8String chkid;
-  iff.get_chunk(chkid);
-  if (chkid != "FORM:BM44")
-    G_THROW( ERR_MSG("IW44Image.corrupt_BM44") );
-  while (--maxchunks>=0 && iff.get_chunk(chkid))
-    {
-      if (chkid == "BM44")
-        decode_chunk(iff.get_bytestream());
-      iff.close_chunk();
-    }
-  iff.close_chunk();
-  close_codec();
+	if (ycodec)
+		G_THROW(ERR_MSG("IW44Image.left_open2"));
+	GUTF8String chkid;
+	iff.get_chunk(chkid);
+	if (chkid != "FORM:BM44")
+		G_THROW(ERR_MSG("IW44Image.corrupt_BM44"));
+	while (--maxchunks >= 0 && iff.get_chunk(chkid))
+	{
+		if (chkid == "BM44")
+			decode_chunk(iff.get_bytestream());
+		iff.close_chunk();
+	}
+	iff.close_chunk();
+	close_codec();
 }
 
 
@@ -1589,8 +1584,8 @@ IWBitmap::decode_iff(IFFByteStream &iff, int maxchunks)
 
 IWEncoderParms::IWEncoderParms(void)
 {
-  // Zero represent default values
-  memset((void*)this, 0, sizeof(IWEncoderParms));
+	// Zero represent default values
+	memset((void*)this, 0, sizeof(IWEncoderParms));
 }
 
 
@@ -1603,88 +1598,88 @@ IWEncoderParms::IWEncoderParms(void)
 
 
 IWPixmap::IWPixmap(void)
-: IW44Image(), crcb_delay(10), crcb_half(0), ycodec(0), cbcodec(0), crcodec(0)
+	: IW44Image(), crcb_delay(10), crcb_half(0), ycodec(0), cbcodec(0), crcodec(0)
 {}
 
 IWPixmap::~IWPixmap()
 {
-  close_codec();
+	close_codec();
 }
 
 int
 IWPixmap::get_percent_memory(void) const
 {
-  int buckets = 0;
-  int maximum = 0;
-  if (ymap)
-    {
-      buckets += ymap->get_bucket_count();
-      maximum += 64*ymap->nb;
-    }
-  if (cbmap)
-    {
-      buckets += cbmap->get_bucket_count();
-      maximum += 64*cbmap->nb;
-    }
-  if (crmap)
-    {
-      buckets += crmap->get_bucket_count();
-      maximum += 64*crmap->nb;
-    }
-  return 100*buckets/ (maximum ? maximum : 1);
+	int buckets = 0;
+	int maximum = 0;
+	if (ymap)
+	{
+		buckets += ymap->get_bucket_count();
+		maximum += 64 * ymap->nb;
+	}
+	if (cbmap)
+	{
+		buckets += cbmap->get_bucket_count();
+		maximum += 64 * cbmap->nb;
+	}
+	if (crmap)
+	{
+		buckets += crmap->get_bucket_count();
+		maximum += 64 * crmap->nb;
+	}
+	return 100 * buckets / (maximum ? maximum : 1);
 }
 
 unsigned int
 IWPixmap::get_memory_usage(void) const
 {
-  unsigned int usage = sizeof(GPixmap);
-  if (ymap)
-    usage += ymap->get_memory_usage();
-  if (cbmap)
-    usage += cbmap->get_memory_usage();
-  if (crmap)
-    usage += crmap->get_memory_usage();
-  return usage;
+	unsigned int usage = sizeof(GPixmap);
+	if (ymap)
+		usage += ymap->get_memory_usage();
+	if (cbmap)
+		usage += cbmap->get_memory_usage();
+	if (crmap)
+		usage += crmap->get_memory_usage();
+	return usage;
 }
 
 
-GP<GPixmap> 
+GP<GPixmap>
 IWPixmap::get_pixmap(void)
 {
-  // Check presence of data
-  if (ymap == 0)
-    return 0;
-  // Allocate pixmap
-  int w = ymap->iw;
-  int h = ymap->ih;
-  GP<GPixmap> ppm = GPixmap::create(h, w);
-  // Perform wavelet reconstruction
-  signed char *ptr = (signed char*) (*ppm)[0];
-  int rowsep = ppm->rowsize() * sizeof(GPixel);
-  int pixsep = sizeof(GPixel);
-  ymap->image(ptr, rowsep, pixsep);
-  if (crmap && cbmap && crcb_delay >= 0)
-  {
-    cbmap->image(ptr+1, rowsep, pixsep, crcb_half);
-    crmap->image(ptr+2, rowsep, pixsep, crcb_half);
-  }
-  // Convert image data to RGB
-  if (crmap && cbmap && crcb_delay >= 0)
-    {
-      Transform::Decode::YCbCr_to_RGB((*ppm)[0], w, h, ppm->rowsize());
-    }
-  else
-    {
-      for (int i=0; i<h; i++)
-        {
-          GPixel *pixrow = (*ppm)[i];
-          for (int j=0; j<w; j++, pixrow++)
-            pixrow->b = pixrow->g = pixrow->r 
-              = 127 - (int)(((signed char*)pixrow)[0]);
-        }
-    }
-  // Return
-  return ppm;
+	// Check presence of data
+	if (ymap == 0)
+		return 0;
+	// Allocate pixmap
+	int w = ymap->iw;
+	int h = ymap->ih;
+	GP<GPixmap> ppm = GPixmap::create(h, w);
+	// Perform wavelet reconstruction
+	signed char *ptr = (signed char*)(*ppm)[0];
+	int rowsep = ppm->rowsize() * sizeof(GPixel);
+	int pixsep = sizeof(GPixel);
+	ymap->image(ptr, rowsep, pixsep);
+	if (crmap && cbmap && crcb_delay >= 0)
+	{
+		cbmap->image(ptr + 1, rowsep, pixsep, crcb_half);
+		crmap->image(ptr + 2, rowsep, pixsep, crcb_half);
+	}
+	// Convert image data to RGB
+	if (crmap && cbmap && crcb_delay >= 0)
+	{
+		Transform::Decode::YCbCr_to_RGB((*ppm)[0], w, h, ppm->rowsize());
+	}
+	else
+	{
+		for (int i = 0; i < h; i++)
+		{
+			GPixel *pixrow = (*ppm)[i];
+			for (int j = 0; j < w; j++, pixrow++)
+				pixrow->b = pixrow->g = pixrow->r
+				= 127 - (int)(((signed char*)pixrow)[0]);
+		}
+	}
+	// Return
+	return ppm;
 }
 
 
@@ -1692,158 +1687,158 @@ IWPixmap::get_pixmap(void)
 GP<GPixmap>
 IWPixmap::get_pixmap(int subsample, const GRect &rect)
 {
-  if (ymap == 0)
-    return 0;
-  // Allocate
-  int w = rect.width();
-  int h = rect.height();
-  GP<GPixmap> ppm = GPixmap::create(h,w);
-  // Perform wavelet reconstruction
-  signed char *ptr = (signed char*) (*ppm)[0];
-  int rowsep = ppm->rowsize() * sizeof(GPixel);
-  int pixsep = sizeof(GPixel);
-  ymap->image(subsample, rect, ptr, rowsep, pixsep);
-  if (crmap && cbmap && crcb_delay >= 0)
-  {
-    cbmap->image(subsample, rect, ptr+1, rowsep, pixsep, crcb_half);
-    crmap->image(subsample, rect, ptr+2, rowsep, pixsep, crcb_half);
-  }
-  // Convert image data to RGB
-  if (crmap && cbmap && crcb_delay >= 0)
-    {
-      Transform::Decode::YCbCr_to_RGB((*ppm)[0], w, h, ppm->rowsize());
-    }
-  else
-    {
-      for (int i=0; i<h; i++)
-        {
-          GPixel *pixrow = (*ppm)[i];
-          for (int j=0; j<w; j++, pixrow++)
-            pixrow->b = pixrow->g = pixrow->r 
-              = 127 - (int)(((signed char*)pixrow)[0]);
-        }
-    }
-  // Return
-  return ppm;
+	if (ymap == 0)
+		return 0;
+	// Allocate
+	int w = rect.width();
+	int h = rect.height();
+	GP<GPixmap> ppm = GPixmap::create(h, w);
+	// Perform wavelet reconstruction
+	signed char *ptr = (signed char*)(*ppm)[0];
+	int rowsep = ppm->rowsize() * sizeof(GPixel);
+	int pixsep = sizeof(GPixel);
+	ymap->image(subsample, rect, ptr, rowsep, pixsep);
+	if (crmap && cbmap && crcb_delay >= 0)
+	{
+		cbmap->image(subsample, rect, ptr + 1, rowsep, pixsep, crcb_half);
+		crmap->image(subsample, rect, ptr + 2, rowsep, pixsep, crcb_half);
+	}
+	// Convert image data to RGB
+	if (crmap && cbmap && crcb_delay >= 0)
+	{
+		Transform::Decode::YCbCr_to_RGB((*ppm)[0], w, h, ppm->rowsize());
+	}
+	else
+	{
+		for (int i = 0; i < h; i++)
+		{
+			GPixel *pixrow = (*ppm)[i];
+			for (int j = 0; j < w; j++, pixrow++)
+				pixrow->b = pixrow->g = pixrow->r
+				= 127 - (int)(((signed char*)pixrow)[0]);
+		}
+	}
+	// Return
+	return ppm;
 }
 
 
 int
 IWPixmap::decode_chunk(GP<ByteStream> gbs)
 {
-  // Open
-  if (! ycodec)
-  {
-      cslice = cserial = 0;
-      delete ymap;
-      ymap = 0;
-  }
+	// Open
+	if (!ycodec)
+	{
+		cslice = cserial = 0;
+		delete ymap;
+		ymap = 0;
+	}
 
-  // Read primary header
-  struct IW44Image::PrimaryHeader primary;
-  primary.decode(gbs);
-  if (primary.serial != cserial)
-    G_THROW( ERR_MSG("IW44Image.wrong_serial2") );
-  int nslices = cslice + primary.slices;
-  // Read secondary header
-  if (cserial == 0)
-    {
-      struct IW44Image::SecondaryHeader secondary;
-      secondary.decode(gbs);
-      if ((secondary.major & 0x7f) != IWCODEC_MAJOR)
-        G_THROW( ERR_MSG("IW44Image.incompat_codec2") );
-      if (secondary.minor > IWCODEC_MINOR)
-        G_THROW( ERR_MSG("IW44Image.recent_codec2") );
-      // Read tertiary header
-      struct IW44Image::TertiaryHeader tertiary;
-      tertiary.decode(gbs, secondary.major & 0x7f, secondary.minor);
-      // Handle header information
-      int w = (tertiary.xhi << 8) | tertiary.xlo;
-      int h = (tertiary.yhi << 8) | tertiary.ylo;
-      crcb_delay = 0;
-      crcb_half = 0;
-      if (secondary.minor>=2)
-        crcb_delay = tertiary.crcbdelay & 0x7f;
-      if (secondary.minor>=2)
-        crcb_half = (tertiary.crcbdelay & 0x80 ? 0 : 1);
-      if (secondary.major & 0x80)
-        crcb_delay = -1;
-      // Create ymap and ycodec    
-      assert(! ymap);
-      assert(! ycodec);
-      ymap = new Map(w, h);
-      ycodec = new Codec::Decode(*ymap);
-      if (crcb_delay >= 0)
-        {
-          cbmap = new Map(w, h);
-          crmap = new Map(w, h);
-          cbcodec = new Codec::Decode(*cbmap);
-          crcodec = new Codec::Decode(*crmap);
-        }
-    }
-  // Read data
-  assert(ymap);
-  assert(ycodec);
-  GP<ZPCodec> gzp=ZPCodec::create(gbs, false, true);
-  ZPCodec &zp=*gzp;
-  int flag = 1;
-  while (flag && cslice<nslices)
-    {
-      flag = ycodec->code_slice(zp);
-      if (crcodec && cbcodec && crcb_delay<=cslice)
-        {
-          flag |= cbcodec->code_slice(zp);
-          flag |= crcodec->code_slice(zp);
-        }
-      cslice++;
-    }
-  // Return
-  cserial += 1;
-  return nslices;
+	// Read primary header
+	struct IW44Image::PrimaryHeader primary;
+	primary.decode(gbs);
+	if (primary.serial != cserial)
+		G_THROW(ERR_MSG("IW44Image.wrong_serial2"));
+	int nslices = cslice + primary.slices;
+	// Read secondary header
+	if (cserial == 0)
+	{
+		struct IW44Image::SecondaryHeader secondary;
+		secondary.decode(gbs);
+		if ((secondary.major & 0x7f) != IWCODEC_MAJOR)
+			G_THROW(ERR_MSG("IW44Image.incompat_codec2"));
+		if (secondary.minor > IWCODEC_MINOR)
+			G_THROW(ERR_MSG("IW44Image.recent_codec2"));
+		// Read tertiary header
+		struct IW44Image::TertiaryHeader tertiary;
+		tertiary.decode(gbs, secondary.major & 0x7f, secondary.minor);
+		// Handle header information
+		int w = (tertiary.xhi << 8) | tertiary.xlo;
+		int h = (tertiary.yhi << 8) | tertiary.ylo;
+		crcb_delay = 0;
+		crcb_half = 0;
+		if (secondary.minor >= 2)
+			crcb_delay = tertiary.crcbdelay & 0x7f;
+		if (secondary.minor >= 2)
+			crcb_half = (tertiary.crcbdelay & 0x80 ? 0 : 1);
+		if (secondary.major & 0x80)
+			crcb_delay = -1;
+		// Create ymap and ycodec    
+		assert(!ymap);
+		assert(!ycodec);
+		ymap = new Map(w, h);
+		ycodec = new Codec::Decode(*ymap);
+		if (crcb_delay >= 0)
+		{
+			cbmap = new Map(w, h);
+			crmap = new Map(w, h);
+			cbcodec = new Codec::Decode(*cbmap);
+			crcodec = new Codec::Decode(*crmap);
+		}
+	}
+	// Read data
+	assert(ymap);
+	assert(ycodec);
+	GP<ZPCodec> gzp = ZPCodec::create(gbs, false, true);
+	ZPCodec &zp = *gzp;
+	int flag = 1;
+	while (flag && cslice < nslices)
+	{
+		flag = ycodec->code_slice(zp);
+		if (crcodec && cbcodec && crcb_delay <= cslice)
+		{
+			flag |= cbcodec->code_slice(zp);
+			flag |= crcodec->code_slice(zp);
+		}
+		cslice++;
+	}
+	// Return
+	cserial += 1;
+	return nslices;
 }
 
 
-int 
+int
 IWPixmap::parm_crcbdelay(const int parm)
 {
-  if (parm >= 0)
-    crcb_delay = parm;
-  return crcb_delay;
+	if (parm >= 0)
+		crcb_delay = parm;
+	return crcb_delay;
 }
 
-void 
+void
 IWPixmap::parm_dbfrac(float frac)
 {
-  if (frac>0 && frac<=1)
-    db_frac = frac;
-  else
-    G_THROW( ERR_MSG("IW44Image.param_range2") );
+	if (frac > 0 && frac <= 1)
+		db_frac = frac;
+	else
+		G_THROW(ERR_MSG("IW44Image.param_range2"));
 }
 
-int 
+int
 IWPixmap::get_serial(void)
 {
-  return cserial;
+	return cserial;
 }
 
 
-void 
+void
 IWPixmap::decode_iff(IFFByteStream &iff, int maxchunks)
 {
-  if (ycodec)
-    G_THROW( ERR_MSG("IW44Image.left_open4") );
-  GUTF8String chkid;
-  iff.get_chunk(chkid);
-  if (chkid!="FORM:PM44" && chkid!="FORM:BM44")
-    G_THROW( ERR_MSG("IW44Image.corrupt_BM44_2") );
-  while (--maxchunks>=0 && iff.get_chunk(chkid))
-    {
-      if (chkid=="PM44" || chkid=="BM44")
-        decode_chunk(iff.get_bytestream());
-      iff.close_chunk();
-    }
-  iff.close_chunk();
-  close_codec();
+	if (ycodec)
+		G_THROW(ERR_MSG("IW44Image.left_open4"));
+	GUTF8String chkid;
+	iff.get_chunk(chkid);
+	if (chkid != "FORM:PM44" && chkid != "FORM:BM44")
+		G_THROW(ERR_MSG("IW44Image.corrupt_BM44_2"));
+	while (--maxchunks >= 0 && iff.get_chunk(chkid))
+	{
+		if (chkid == "PM44" || chkid == "BM44")
+			decode_chunk(iff.get_bytestream());
+		iff.close_chunk();
+	}
+	iff.close_chunk();
+	close_codec();
 }
 
 //////////////////////////////////////////////////////
@@ -1853,8 +1848,8 @@ IWPixmap::decode_iff(IFFByteStream &iff, int maxchunks)
 void
 IW44Image::Transform::filter_begin(int w, int h)
 {
-  if (MMXControl::mmxflag < 0)  
-    MMXControl::enable_mmx();
+	if (MMXControl::mmxflag < 0)
+		MMXControl::enable_mmx();
 }
 
 
@@ -1862,8 +1857,8 @@ void
 IW44Image::Transform::filter_end(void)
 {
 #ifdef MMX
-  if (MMXControl::mmxflag > 0)
-    MMXemms;
+	if (MMXControl::mmxflag > 0)
+		MMXemms;
 #endif
 }
 
@@ -1879,31 +1874,31 @@ IW44Image::Transform::filter_end(void)
 
 void
 IW44Image::Transform::Decode::backward(short *p, int w, int h, int rowsize, int begin, int end)
-{ 
-  // PREPARATION
-  filter_begin(w,h);
-  // LOOP ON SCALES
-  for (int scale=begin>>1; scale>=end; scale>>=1)
-    {
+{
+	// PREPARATION
+	filter_begin(w, h);
+	// LOOP ON SCALES
+	for (int scale = begin >> 1; scale >= end; scale >>= 1)
+	{
 #ifdef IWTRANSFORM_TIMER
-      int tv,th;
-      th = tv = GOS::ticks();
+		int tv, th;
+		th = tv = GOS::ticks();
 #endif
-      filter_bv(p, w, h, rowsize, scale);
+		filter_bv(p, w, h, rowsize, scale);
 #ifdef IWTRANSFORM_TIMER
-      th = GOS::ticks();
-      tv = th - tv;
+		th = GOS::ticks();
+		tv = th - tv;
 #endif
-      filter_bh(p, w, h, rowsize, scale);
+		filter_bh(p, w, h, rowsize, scale);
 #ifdef IWTRANSFORM_TIMER
-      th = GOS::ticks()-th;
-      DjVuPrintErrorUTF8("back%d\tv=%dms h=%dms\n", scale,tv,th);
+		th = GOS::ticks() - th;
+		DjVuPrintErrorUTF8("back%d\tv=%dms h=%dms\n", scale, tv, th);
 #endif
-    }
-  // TERMINATE
-  filter_end();
+	}
+	// TERMINATE
+	filter_end();
 }
-  
+
 
 
 
@@ -1912,35 +1907,33 @@ IW44Image::Transform::Decode::backward(short *p, int w, int h, int rowsize, int 
 //////////////////////////////////////////////////////
 
 /* Converts YCbCr to RGB. */
-void 
+void
 IW44Image::Transform::Decode::YCbCr_to_RGB(GPixel *p, int w, int h, int rowsize)
 {
-  for (int i=0; i<h; i++,p+=rowsize)
-    {
-      GPixel *q = p;
-      for (int j=0; j<w; j++,q++)
-        {
-          signed char y = ((signed char*)q)[0];
-          signed char b = ((signed char*)q)[1];
-          signed char r = ((signed char*)q)[2];
-          // This is the Pigeon transform
-          int t1 = b >> 2 ; 
-          int t2 = r + (r >> 1);
-          int t3 = y + 128 - t1;
-          int tr = y + 128 + t2;
-          int tg = t3 - (t2 >> 1);
-          int tb = t3 + (b << 1);
-          q->r = max(0,min(255,tr));
-          q->g = max(0,min(255,tg));
-          q->b = max(0,min(255,tb));
-        }
-    }
+	for (int i = 0; i < h; i++, p += rowsize)
+	{
+		GPixel *q = p;
+		for (int j = 0; j < w; j++, q++)
+		{
+			signed char y = ((signed char*)q)[0];
+			signed char b = ((signed char*)q)[1];
+			signed char r = ((signed char*)q)[2];
+			// This is the Pigeon transform
+			int t1 = b >> 2;
+			int t2 = r + (r >> 1);
+			int t3 = y + 128 - t1;
+			int tr = y + 128 + t2;
+			int tg = t3 - (t2 >> 1);
+			int tb = t3 + (b << 1);
+			q->r = max(0, min(255, tr));
+			q->g = max(0, min(255, tg));
+			q->b = max(0, min(255, tb));
+		}
+	}
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

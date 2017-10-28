@@ -71,12 +71,7 @@
 #endif
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 lt_XMLContents::lt_XMLContents(void) {}
 
@@ -408,9 +403,7 @@ lt_XMLContents::write(ByteStream &bs) const
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

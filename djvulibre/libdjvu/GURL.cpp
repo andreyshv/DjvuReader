@@ -160,12 +160,7 @@
 #endif
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 static const char djvuopts[] = "DJVUOPTS";
@@ -1779,7 +1774,6 @@ GURL::expand_name(const GUTF8String &xfname, const char *from)
 #elif defined(_WIN32) // WIN32 implementation
   // Handle base
 	strcpy(string_buffer, (char const *)(from ? expand_name(from) : GOS::cwd()));
-#if !ERR
 	//  GNativeString native;
 	if (fname)
 	{
@@ -1811,6 +1805,7 @@ GURL::expand_name(const GUTF8String &xfname, const char *from)
 				if (toupper((unsigned char)s[0]) != toupper((unsigned char)fname[0])
 					|| s[1] != colon)
 				{
+#if !ERR
 					drv[0] = fname[0];
 					drv[1] = colon;
 					drv[2] = dot;
@@ -1818,6 +1813,7 @@ GURL::expand_name(const GUTF8String &xfname, const char *from)
 					GetFullPathName(drv, maxlen, string_buffer, &s);
 					strcpy(string_buffer, (const char *)GUTF8String(string_buffer).getNative2UTF8());
 					s = string_buffer;
+#endif
 				}
 				fname += 2;
 			}
@@ -1852,8 +1848,8 @@ GURL::expand_name(const GUTF8String &xfname, const char *from)
 					&& (fname[2] == slash || fname[2] == backslash || !fname[2]))
 				{
 					fname += 2;
-					char *back = _tcsrchr(string_buffer, backslash);
-					char *forward = _tcsrchr(string_buffer, slash);
+					char *back = strrchr(string_buffer, backslash); //_tcsrchr(string_buffer, backslash);
+					char *forward = strrchr(string_buffer, slash); //_tcsrchr(string_buffer, slash);
 					if (back > forward)
 					{
 						*back = 0;
@@ -1880,7 +1876,6 @@ GURL::expand_name(const GUTF8String &xfname, const char *from)
 			*s = 0;
 		}
 	}
-#endif
 #else
 # error "Define something here for your operating system"
 #endif  
@@ -1905,9 +1900,7 @@ hash(const GURL & gurl)
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

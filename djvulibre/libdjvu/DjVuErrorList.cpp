@@ -69,12 +69,7 @@
 #include <string.h>
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 DjVuErrorList::DjVuErrorList() {}
@@ -135,7 +130,7 @@ GP<DataPool>
 DjVuErrorList::request_data(const DjVuPort * source, const GURL & url)
 {
    GP<DataPool> retval;
-   G_TRY
+   try
    {
      if (pool && url.protocol().downcase() == "data")
      {
@@ -152,22 +147,18 @@ DjVuErrorList::request_data(const DjVuPort * source, const GURL & url)
        }
      }else if (url.is_local_file_url())
      {
-//       GUTF8String fname=GOS::url_to_filename(url);
-//       if (GOS::basename(fname)=="-") fname="-";
        retval=DataPool::create(url);
      }
    }
-   G_CATCH_ALL
+   catch(...) {
    {
      retval=0;
-   } G_ENDCATCH;
+   } };
    return retval;
 }
  
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

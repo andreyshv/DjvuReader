@@ -1,7 +1,7 @@
 ﻿
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DjvuWrapper;
+using djvulibre;
 
 namespace djvulibre.test
 {

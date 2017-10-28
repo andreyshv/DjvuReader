@@ -79,26 +79,26 @@
     standard documents. This emulation is now considered obsolete. All
     exception are now based on C++ exception.
     
-    There are four macros for handling exceptions.  Macros #G_TRY#, #G_CATCH# and
-    #G_ENDCATCH# are used to define an exception catching block.  Exceptions can
+    There are four macros for handling exceptions.  Macros #try#, #G_CATCH# and
+    #}# are used to define an exception catching block.  Exceptions can
     be thrown at all times using macro #G_THROW(cause)#. An exception can be
-    re-thrown from a catch block using macro #G_RETHROW#.
+    re-thrown from a catch block using macro #throw#.
     
     Example:
     \begin{verbatim}
-    G_TRY
+    try
       {
         // program lines which may result in a call to THROW()
         G_THROW("message");
       }
-    G_CATCH(ex) 
+    catch(const GException &ex) { 
       {
         // Variable ex refers to a GException object.
         ex.perror();  
         // You can rethrow the exception to an outer exception handler.
-        G_RETHROW;
+        throw;
       }
-    G_ENDCATCH;
+    };
     \end{verbatim} 
 
     @memo 
@@ -118,15 +118,10 @@
 # endif
 #endif
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-# endif
-#endif
 
 /** Exception class.  
-    The library always uses macros #G_TRY#, #G_THROW#, #G_CATCH# and #G_ENDCATCH# for
+    The library always uses macros #try#, #G_THROW#, #G_CATCH# and #}# for
     throwing and catching exceptions (see \Ref{GException.h}). These macros
     only deal with exceptions of type #GException#. */
 
@@ -209,40 +204,20 @@ private:
 
 //@}
 
-#undef G_TRY
-#undef G_CATCH
-#undef G_CATCH_ALL
-#undef G_ENDCATCH
-#undef G_RETHROW
-#undef G_THROW
-
-#ifdef USE_EXCEPTION_EMULATION
-# error "Libdjvulibre requires c++ exceptions"
-#else
-
 // Compiler supports ANSI C++ exceptions.
 // Defined exception macros accordingly.
 
-# define G_TRY         try
-# define G_CATCH(n)    catch(const GException &n) { 
-# define G_CATCH_ALL   catch(...) { 
-# define G_ENDCATCH    } 
-# define G_RETHROW     throw
 # ifdef __GNUG__
 #  define G_THROW(msg) throw GException(msg,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 # else
 #  define G_THROW(msg) throw GException(msg,__FILE__,__LINE__)
 # endif
 
-#endif
-
 
 // -------------- THE END
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 #endif

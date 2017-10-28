@@ -6,14 +6,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_LoadedAsync">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="102*"/>
-            <ColumnDefinition Width="1399*"/>
-        </Grid.ColumnDefinitions>
+    <Grid Background="#FFAEAEAE">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <TextBlock Text="Pages:" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" x:Name="PageCount" Grid.Column="1"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" x:Name="PageCount" Grid.Column="1"/>
+        <Slider></Slider>
+        <ScrollViewer Grid.Row="1" Height="905" Margin="10,0,10,0" ZoomMode="Enabled" >
+            <Image x:Name="imageControl" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform ScaleY="-1"/>
+                </Image.RenderTransform>
+            </Image>
+        </ScrollViewer>
     </Grid>
 </Page>

@@ -63,12 +63,7 @@
 #include "GContainer.h"
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 // ------------------------------------------------------------
@@ -109,7 +104,7 @@ GArrayBase::GArrayBase(const GCONT Traits &traits, int lobound, int hibound)
 
 GArrayBase::~GArrayBase()
 {
-  G_TRY { empty(); } G_CATCH_ALL { } G_ENDCATCH;
+  try { empty(); } catch(...) { { } };
 }
 
 
@@ -221,7 +216,7 @@ GArrayBase::resize(int lo, int hi)
 #if GCONTAINER_ZERO_FILL
   memset(ndata, 0, bytesize);  // slower but cleaner
 #endif
-  G_TRY
+  try
     {
       if (lo < lobound)
         { traits.init( traits.lea(ndata,lo-nminlo), lobound-lo ); beg=lobound; }
@@ -236,13 +231,13 @@ GArrayBase::resize(int lo, int hi)
                        traits.lea(data, beg-minlo),
                        end-beg+1, 1 ); }
     }
-  G_CATCH_ALL
+  catch(...) {
     {
       if (ndata)
         ::operator delete(ndata);
-      G_RETHROW;
+      throw;
     }
-  G_ENDCATCH;
+  };
   // free and replace
   if (data) 
     ::operator delete(data);
@@ -314,20 +309,20 @@ GArrayBase::ins(int n, const void *src, int howmany)
 #if GCONTAINER_ZERO_FILL
       memset(ndata, 0, bytesize);
 #endif
-      G_TRY
+      try
         {
           if (hibound >= lobound)
             traits.copy( traits.lea(ndata, lobound-minlo),
                          traits.lea(data, lobound-minlo),
                          hibound-lobound+1, 1 );
         }
-      G_CATCH_ALL
+      catch(...) {
         {
           if (ndata)
             ::operator delete (ndata);
-          G_RETHROW;
+          throw;
         }
-      G_ENDCATCH;
+      };
       if (data)
         ::operator delete(data);
       data = ndata;
@@ -406,14 +401,14 @@ GListBase::GListBase(const GListBase &ref)
 
 GListBase::~GListBase()
 {
-  G_TRY
+  try
   {
     empty();
   }
-  G_CATCH_ALL
+  catch(...) {
   {
   }
-  G_ENDCATCH;
+  };
 }
 
 
@@ -653,7 +648,7 @@ GSetBase::GSetBase(const GSetBase &ref)
 
 GSetBase::~GSetBase()
 {
-  G_TRY { empty(); } G_CATCH_ALL { } G_ENDCATCH;
+  try { empty(); } catch(...) { { } };
 //  delete [] table;
 }
 
@@ -804,10 +799,8 @@ GSetBase::empty()
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 

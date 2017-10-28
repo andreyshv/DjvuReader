@@ -75,12 +75,7 @@
 
 #include <ctype.h>
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 static const char octets[4]={0x41,0x54,0x26,0x54};
@@ -588,7 +583,7 @@ DjVuDocEditor::insert_file(const GP<DataPool> &file_pool,
   if(file_pool)
   {
     const GP<DjVmDir> dir(get_djvm_dir());
-    G_TRY
+    try
     {
          // Now get a unique name for this file.
          // Check the name2id first...
@@ -707,7 +702,7 @@ DjVuDocEditor::insert_file(const GP<DataPool> &file_pool,
             const GURL::UTF8 full_url(name,file_url.base());
             iff_in.close_chunk();
 
-            G_TRY {
+            try {
                if (insert_file(full_url, false, file_pos, name2id, source))
                {
                      // If the child file has been inserted (doesn't
@@ -717,13 +712,13 @@ DjVuDocEditor::insert_file(const GP<DataPool> &file_pool,
                   iff_out.get_bytestream()->writestring(id);
                   iff_out.close_chunk();
                }
-            } G_CATCH(exc) {
+            } catch(const GException &exc) { {
                   // Should an error occur, we move on. INCL chunk will
                   // not be copied.
                if (errors.length())
                  errors+="\n\n";
                errors+=exc.get_cause();
-            } G_ENDCATCH;
+            } };
          }
       } // while(iff_in.get_chunk(chkid))
       iff_out.close_chunk();
@@ -743,12 +738,12 @@ DjVuDocEditor::insert_file(const GP<DataPool> &file_pool,
          GCriticalSectionLock lock(&files_lock);
          files_map[id]->pool=new_file_pool;
       }
-    } G_CATCH(exc) {
+    } catch(const GException &exc) { {
       if (errors.length())
         errors+="\n\n";
       errors+=exc.get_cause();
       G_THROW(errors);
-    } G_ENDCATCH;
+    } };
 
       // The only place where we intercept exceptions is when we process
       // included files. We want to process all of them even if we failed to
@@ -771,7 +766,7 @@ DjVuDocEditor::insert_group(const GList<GURL> & file_urls, int page_num,
   refresh_cb=_refresh_cb;
   refresh_cl_data=_cl_data;
 
-  G_TRY
+  try
   {
 
      // First translate the page_num to file_pos.
@@ -796,7 +791,7 @@ DjVuDocEditor::insert_group(const GList<GURL> & file_urls, int page_num,
     {
       const GURL &furl=file_urls[pos];
       DEBUG_MSG( "Inserting file '" << furl << "'\n" );
-      G_TRY
+      try
       {
                // Check if it's a multipage document...
         GP<DataPool> xdata_pool(DataPool::create(furl));
@@ -843,7 +838,7 @@ DjVuDocEditor::insert_group(const GList<GURL> & file_urls, int page_num,
         {
           insert_file(furl, true, file_pos, name2id, this);
         }
-      } G_CATCH(exc)
+      } catch(const GException &exc) {
       {
         if (errors.length())
         {
@@ -851,18 +846,18 @@ DjVuDocEditor::insert_group(const GList<GURL> & file_urls, int page_num,
         }
         errors+=exc.get_cause();
       }
-      G_ENDCATCH;
+      };
     }
     if (errors.length())
     {
       G_THROW(errors);
     }
-  } G_CATCH_ALL
+  } catch(...) {
   {
     refresh_cb=0;
     refresh_cl_data=0;
-    G_RETHROW;
-  } G_ENDCATCH;
+    throw;
+  } };
   refresh_cb=0;
   refresh_cl_data=0;
 }
@@ -986,7 +981,7 @@ DjVuDocEditor::remove_file(const GUTF8String &id, bool remove_unref,
    GP<DjVuFile> file=get_djvu_file(id);
    if (file)
    {
-      G_TRY {
+      try {
          GPList<DjVuFile> files_list=file->get_included_files(false);
          for(GPosition pos=files_list;pos;++pos)
          {
@@ -1000,10 +995,10 @@ DjVuDocEditor::remove_file(const GUTF8String &id, bool remove_unref,
             if (remove_unref && (!parents || !parents->size()))
                remove_file(child_id, remove_unref, ref_map);
          }
-      } G_CATCH(exc) {
+      } catch(const GException &exc) { {
          if (errors.length()) errors+="\n\n";
          errors+=exc.get_cause();
-      } G_ENDCATCH;
+      } };
    }
 
       // Finally remove this file from the directory.
@@ -2194,9 +2189,7 @@ DjVuDocEditor::get_doc_url(void) const
 
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

@@ -75,12 +75,7 @@
 #endif
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 /** @name DjVuFileCache.h
     Files #"DjVuFileCache.h"# and #"DjVuFileCache.cpp"# implement a simple
@@ -277,10 +272,8 @@ DjVuFileCache::create(const int max_size)
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 #endif

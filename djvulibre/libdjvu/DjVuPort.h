@@ -67,12 +67,7 @@
 #include "GURL.h"
 #include "stddef.h"
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 class DataPool;
 
@@ -510,10 +505,9 @@ DjVuMemoryPort::inherits(const GUTF8String &class_name) const
 //@}
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
 #endif
-#endif
+

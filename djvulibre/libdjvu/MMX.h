@@ -64,73 +64,68 @@
 
 #include "DjVuGlobal.h"
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 /** @name MMX.h
-    Files #"MMX.h"# and #"MMX.cpp"# implement basic routines for
-    supporting the MMX instructions on x86.  Future instruction sets
-    for other processors may be supported in this file as well.
+	Files #"MMX.h"# and #"MMX.cpp"# implement basic routines for
+	supporting the MMX instructions on x86.  Future instruction sets
+	for other processors may be supported in this file as well.
 
-    Macro #MMX# is defined if the compiler supports the X86-MMX instructions.
-    It does not mean however that the processor supports the instruction set.
-    Variable #MMXControl::mmxflag# must be used to decide whether MMX.
-    instructions can be executed.  MMX instructions are entered in the middle
-    of C++ code using the following macros.  Examples can be found in
-    #"IWTransform.cpp"#.
+	Macro #MMX# is defined if the compiler supports the X86-MMX instructions.
+	It does not mean however that the processor supports the instruction set.
+	Variable #MMXControl::mmxflag# must be used to decide whether MMX.
+	instructions can be executed.  MMX instructions are entered in the middle
+	of C++ code using the following macros.  Examples can be found in
+	#"IWTransform.cpp"#.
 
-    \begin{description}
-    \item[MMXrr( insn, srcreg, dstreg)] 
-       Encode a register to register MMX instruction 
-       (e.g. #paddw# or #punpcklwd#).
-    \item[MMXar( insn, addr, dstreg )]
-       Encode a memory to register MMX instruction 
-       (e.g. #moveq# from memory).
-    \item[MMXra( insn, srcreg, addr )]
-       Encode a register to memory MMX instruction 
-       (e.g. #moveq# to memory).
-    \item[MMXir( insn, imm, dstreg )]
-       Encode a immediate to register MMX instruction 
-       (e.g #psraw#).
-    \item[MMXemms]
-       Execute the #EMMS# instruction to reset the FPU state.
-    \end{description}
+	\begin{description}
+	\item[MMXrr( insn, srcreg, dstreg)]
+	   Encode a register to register MMX instruction
+	   (e.g. #paddw# or #punpcklwd#).
+	\item[MMXar( insn, addr, dstreg )]
+	   Encode a memory to register MMX instruction
+	   (e.g. #moveq# from memory).
+	\item[MMXra( insn, srcreg, addr )]
+	   Encode a register to memory MMX instruction
+	   (e.g. #moveq# to memory).
+	\item[MMXir( insn, imm, dstreg )]
+	   Encode a immediate to register MMX instruction
+	   (e.g #psraw#).
+	\item[MMXemms]
+	   Execute the #EMMS# instruction to reset the FPU state.
+	\end{description}
 
-    @memo
-    Essential support for MMX.
-    @author: 
-    L\'eon Bottou <leonb@research.att.com> -- initial implementation */
-//@{
+	@memo
+	Essential support for MMX.
+	@author:
+	L\'eon Bottou <leonb@research.att.com> -- initial implementation */
+	//@{
 
 
-/** MMX Control. 
-    Class #MMXControl# encapsulates a few static functions for 
-    globally enabling or disabling MMX support. */
+	/** MMX Control.
+		Class #MMXControl# encapsulates a few static functions for
+		globally enabling or disabling MMX support. */
 
 class MMXControl
 {
- public:
-  // MMX DETECTION
-  /** Detects and enable MMX or similar technologies.  This function checks
-      whether the CPU supports a vectorial instruction set (such as Intel's
-      MMX) and enables them.  Returns a boolean indicating whether such an
-      instruction set is available.  Speedups factors may vary. */
-  static int enable_mmx();
-  /** Disables MMX or similar technologies.  The transforms will then be
-      performed using the baseline code. */
-  static int disable_mmx();
-  /** Contains a value greater than zero if the CPU supports vectorial
-      instructions. A negative value means that you must call \Ref{enable_mmx}
-      and test the value again. Direct access to this member should only be
-      used to transfer the instruction flow to the vectorial branch of the
-      code. Never modify the value of this variable.  Use #enable_mmx# or
-      #disable_mmx# instead. */
-  static int mmxflag;  // readonly
+public:
+	// MMX DETECTION
+	/** Detects and enable MMX or similar technologies.  This function checks
+		whether the CPU supports a vectorial instruction set (such as Intel's
+		MMX) and enables them.  Returns a boolean indicating whether such an
+		instruction set is available.  Speedups factors may vary. */
+	static int enable_mmx();
+	/** Disables MMX or similar technologies.  The transforms will then be
+		performed using the baseline code. */
+	static int disable_mmx();
+	/** Contains a value greater than zero if the CPU supports vectorial
+		instructions. A negative value means that you must call \Ref{enable_mmx}
+		and test the value again. Direct access to this member should only be
+		used to transfer the instruction flow to the vectorial branch of the
+		code. Never modify the value of this variable.  Use #enable_mmx# or
+		#disable_mmx# instead. */
+	static int mmxflag;  // readonly
 };
 
 //@}
@@ -144,7 +139,7 @@ class MMXControl
 #ifndef NO_MMX
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-typedef struct{ char c[8]; } MMX_t;
+typedef struct { char c[8]; } MMX_t;
 #define MMXemms \
   __asm__ volatile("emms" : : : "memory" ) 
 #define MMXrr(op,src,dst) \
@@ -172,9 +167,9 @@ typedef struct{ char c[8]; } MMX_t;
 #define MMXir(op,imm,dst) \
   __asm { op dst,imm }
 #define MMXar(op,addr,dst) \
-  { register __int64 var=*(__int64*)(addr); __asm { op dst,var } }
+  { __int64 var=*(__int64*)(addr); __asm { op dst,var } }
 #define MMXra(op,src,addr) \
-  { register __int64 var; __asm { op [var],src };  *(__int64*)addr = var; } 
+  { __int64 var; __asm { op [var],src };  *(__int64*)addr = var; } 
 // Probably not as efficient as GCC macros
 #define MMX 1
 #endif
@@ -183,10 +178,8 @@ typedef struct{ char c[8]; } MMX_t;
 
 // -----------
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 #endif

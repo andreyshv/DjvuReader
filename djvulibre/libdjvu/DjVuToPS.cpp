@@ -84,12 +84,7 @@
 #endif
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 static const size_t ps_string_size=15000;
@@ -2573,10 +2568,8 @@ print(ByteStream &str, GP<DjVuDocument> doc)
 
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 

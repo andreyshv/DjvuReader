@@ -77,32 +77,26 @@
 #include "GSmartPointer.h"
 #include "GException.h"
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
-
 
 // ------ GPENABLED
 
 GPEnabled::~GPEnabled()
 {
-  if (count > 0)
-    G_THROW( ERR_MSG("GSmartPointer.suspicious") );
+	if (count > 0)
+		G_THROW(ERR_MSG("GSmartPointer.suspicious"));
 }
 
 void
 GPEnabled::destroy()
 {
-  // Only delete if the counter is still zero.
-  // because someone may have rescued the object...
-  // If yes, set the counter to -0x7fff to mark 
-  // the object as doomed and make sure things
-  // will work if the destructor uses a GP...
-  if (! atomicCompareAndSwap(&count, 0, -0x7fff))
-    delete this;
+	// Only delete if the counter is still zero.
+	// because someone may have rescued the object...
+	// If yes, set the counter to -0x7fff to mark 
+	// the object as doomed and make sure things
+	// will work if the destructor uses a GP...
+	if (!atomicCompareAndSwap(&count, 0, -0x7fff))
+		delete this;
 }
 
 
@@ -110,26 +104,26 @@ GPEnabled::destroy()
 
 
 GPBase&
-GPBase::assign (const GPBase &sptr)
+GPBase::assign(const GPBase &sptr)
 {
-  GPEnabled *nptr = sptr.ptr;
-  if (nptr && atomicIncrement(&nptr->count) <= 0)
-    nptr = 0;
-  GPEnabled *optr = (GPEnabled*)atomicExchangePointer((void**)&ptr, (void*)nptr);
-  if (optr)
-    optr->unref();
-  return *this;
+	GPEnabled *nptr = sptr.ptr;
+	if (nptr && atomicIncrement(&nptr->count) <= 0)
+		nptr = 0;
+	GPEnabled *optr = (GPEnabled*)atomicExchangePointer((void**)&ptr, (void*)nptr);
+	if (optr)
+		optr->unref();
+	return *this;
 }
 
 GPBase&
-GPBase::assign (GPEnabled *nptr)
+GPBase::assign(GPEnabled *nptr)
 {
-  if (nptr && atomicIncrement(&nptr->count) <= 0)
-    nptr = 0;
-  GPEnabled *optr = (GPEnabled*)atomicExchangePointer((void**)&ptr, (void*)nptr);
-  if (optr)
-    optr->unref();
-  return *this;
+	if (nptr && atomicIncrement(&nptr->count) <= 0)
+		nptr = 0;
+	GPEnabled *optr = (GPEnabled*)atomicExchangePointer((void**)&ptr, (void*)nptr);
+	if (optr)
+		optr->unref();
+	return *this;
 }
 
 
@@ -139,70 +133,68 @@ GPBase::assign (GPEnabled *nptr)
 
 
 void
-GPBufferBase::replace(void *nptr,const size_t n)
+GPBufferBase::replace(void *nptr, const size_t n)
 {
-  resize(0,0);
-  ptr=nptr;
-  num=n;
+	resize(0, 0);
+	ptr = nptr;
+	num = n;
 }
 
-GPBufferBase::GPBufferBase(void *&xptr,const size_t n,const size_t t) 
-  : ptr(xptr), num(n)
+GPBufferBase::GPBufferBase(void *&xptr, const size_t n, const size_t t)
+	: ptr(xptr), num(n)
 {
-  if (n)
-    xptr = ::operator new(n*t);
-  else
-    xptr = 0;
+	if (n)
+		xptr = ::operator new(n*t);
+	else
+		xptr = 0;
 }
 
 GPBufferBase::~GPBufferBase()
 {
-  ::operator delete(ptr);
+	::operator delete(ptr);
 }
 
-void 
+void
 GPBufferBase::swap(GPBufferBase &other)
 {
-  void * const temp_ptr=ptr;
-  ptr=other.ptr;
-  other.ptr=temp_ptr;
-  const size_t temp_num=num;
-  num=other.num;
-  other.num=temp_num;
+	void * const temp_ptr = ptr;
+	ptr = other.ptr;
+	other.ptr = temp_ptr;
+	const size_t temp_num = num;
+	num = other.num;
+	other.num = temp_num;
 }
 
 void
 GPBufferBase::resize(const size_t n, const size_t t)
 {
-  if(!n && !ptr)
-    {
-      num=0;
-    }
-  else
-    {
-      const size_t s=ptr?(((num<n)?num:n)*t):0;
-      void *nptr;
-      GPBufferBase gnptr(nptr, n, t);
-      if(s)
-        {
-          memcpy(nptr, ptr, s);
-        }
-      swap(gnptr);
-    }
+	if (!n && !ptr)
+	{
+		num = 0;
+	}
+	else
+	{
+		const size_t s = ptr ? (((num < n) ? num : n)*t) : 0;
+		void *nptr;
+		GPBufferBase gnptr(nptr, n, t);
+		if (s)
+		{
+			memcpy(nptr, ptr, s);
+		}
+		swap(gnptr);
+	}
 }
 
 void
-GPBufferBase::set(const size_t t,const char c)
+GPBufferBase::set(const size_t t, const char c)
 {
-  if(num)
-    memset(ptr,c,num*t);
+	if (num)
+		memset(ptr, c, num*t);
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
 

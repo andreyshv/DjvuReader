@@ -68,12 +68,7 @@
 #include "debug.h"
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 static const char octets[4]={0x41,0x54,0x26,0x54};
 
@@ -246,7 +241,7 @@ DjVmDoc::get_data(const GUTF8String &id) const
     G_THROW(GUTF8String( ERR_MSG("DjVmDoc.cant_find") "\t") + id);
   const GP<DataPool> pool(data[pos]);
    // First check that the file is in IFF format
-  G_TRY
+  try
   {
     const GP<ByteStream> str_in(pool->get_stream());
     const GP<IFFByteStream> giff_in=IFFByteStream::create(str_in);
@@ -256,11 +251,11 @@ DjVmDoc::get_data(const GUTF8String &id) const
     if (size<0 || size>0x7fffffff)
       G_THROW( ERR_MSG("DjVmDoc.not_IFF") "\t" + id);
   }
-  G_CATCH_ALL 
+  catch(...) { 
   {
     G_THROW( ERR_MSG("DjVmDoc.not_IFF") "\t" + id);
   }
-  G_ENDCATCH;
+  };
   return pool;
 }
 
@@ -654,9 +649,7 @@ DjVmDoc::expand(const GURL &codebase, const GUTF8String &idx_name)
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif

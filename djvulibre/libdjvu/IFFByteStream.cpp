@@ -71,12 +71,7 @@
 #include "IFFByteStream.h"
 
 
-#ifdef HAVE_NAMESPACES
 namespace DJVU {
-# ifdef NOT_DEFINED // Just to fool emacs c++ mode
-}
-#endif
-#endif
 
 
 // Constructor
@@ -262,7 +257,7 @@ IFFByteStream::get_chunk(GUTF8String &chkid, int *rawoffsetptr, int *rawsizeptr)
 
   // Create context record
   IFFContext *nctx = new IFFContext;
-  G_TRY
+  try
   {
     nctx->next = ctx;
     nctx->offStart = seekto;
@@ -280,12 +275,12 @@ IFFByteStream::get_chunk(GUTF8String &chkid, int *rawoffsetptr, int *rawsizeptr)
       nctx->bComposite = 0;
     }
   }
-  G_CATCH_ALL
+  catch(...) {
   {
     delete nctx;
-    G_RETHROW;
+    throw;
   }
-  G_ENDCATCH;
+  };
   
   // Install context record
   ctx = nctx;
@@ -357,7 +352,7 @@ IFFByteStream::put_chunk(const char *chkid, int insert_magic)
 
   // Create new context record
   IFFContext *nctx = new IFFContext;
-  G_TRY
+  try
   {
     nctx->next = ctx;
     nctx->offStart = seekto;
@@ -375,12 +370,12 @@ IFFByteStream::put_chunk(const char *chkid, int insert_magic)
       nctx->bComposite = 0;
     }
   }
-  G_CATCH_ALL
+  catch(...) {
   {
     delete nctx;
-    G_RETHROW;
+    throw;
   }
-  G_ENDCATCH; 
+  }; 
   // Install context record and leave
   ctx = nctx;
 }
@@ -561,9 +556,7 @@ IFFByteStream::compare(IFFByteStream &iff)
 }
 
 
-#ifdef HAVE_NAMESPACES
 }
 # ifndef NOT_USING_DJVU_NAMESPACE
 using namespace DJVU;
 # endif
-#endif
