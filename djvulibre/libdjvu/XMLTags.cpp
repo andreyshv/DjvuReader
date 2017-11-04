@@ -173,7 +173,7 @@ lt_XMLTags::init(const GP<ByteStream> &bs)
 void
 lt_XMLTags::init(const GURL &url)
 {
-  const GP<ByteStream> bs=ByteStream::create(url,"rb");
+  const GP<ByteStream> bs=ByteStream::create(url);
   init(bs);
 }
 

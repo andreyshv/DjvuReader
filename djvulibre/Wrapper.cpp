@@ -1,4 +1,4 @@
-#include "DjVuLibre.h"
+#include "Wrapper.h"
 #include "libdjvu\GString.h"
 #include "libdjvu\DjVuInfo.h"
 #include "libdjvu\DjVuImage.h"
@@ -31,7 +31,7 @@ namespace djvulibre
 		// DjVuSource::FromFile
 		GP<DjVuDocument> pDoc = NULL;
 		std::string utf8Name = ConvertCxStringToUTF8(fileName);
-		auto gstr = GUTF8String(utf8Name.c_str(), utf8Name.length());
+		auto gstr = GUTF8String::create(utf8Name);
 		GURL url = GURL::Filename::UTF8(gstr);
 
 		pDoc = DjVuDocument::create(url);
@@ -149,50 +149,6 @@ namespace djvulibre
 			pGBitmap = pImage->get_bitmap(rect, rect, 4);
 		}
 		
-#if 0
-		CDIB* pBitmap = NULL;
-
-		if (pGPixmap != NULL)
-		{
-			if (nTotalRotate != 0)
-				pGPixmap = pGPixmap->rotate(nTotalRotate);
-
-			/*if (bScalePnmFixed)
-			{
-				if (bScaleSubpix)
-					pGPixmap = RescalePnm_subpix(pGPixmap, size.cx, size.cy);
-				else
-					pGPixmap = RescalePnm(pGPixmap, size.cx, size.cy);
-			}*/
-
-			//pBitmap = RenderPixmap(*pGPixmap, displaySettings);
-		}/*
-		else if (pGBitmap != NULL)
-		{
-			if (nTotalRotate != 0)
-				pGBitmap = pGBitmap->rotate(nTotalRotate);
-
-			if (bScalePnmFixed)
-			{
-				if (bScaleSubpix)
-					pGPixmap = RescalePnm_subpix(pGBitmap, size.cx, size.cy);
-				else
-					pGBitmap = RescalePnm(pGBitmap, size.cx, size.cy);
-			}
-
-			if (pGPixmap)
-				pBitmap = RenderPixmap(*pGPixmap, displaySettings);
-			else
-				pBitmap = RenderBitmap(*pGBitmap, displaySettings);
-		}
-		else
-		{
-			pBitmap = RenderEmpty(size, displaySettings);
-		}
-
-		if (pBitmap != NULL)
-			pBitmap->SetDPI(pImage->get_dpi());*/
-#endif
 		return NULL;
 	}
 
@@ -212,7 +168,7 @@ namespace djvulibre
 		GP<GPixmap> pGPixmap = pImage->get_pixmap(rect, 1, 0, GPixel::WHITE);
 		if (pGPixmap != NULL)
 		{
-			return CreateSoftwareBitmap(NULL, pGPixmap);
+			return CreateSoftwareBitmap(pGPixmap);
 		} 
 		
 		// high level
@@ -223,7 +179,7 @@ namespace djvulibre
 		// This method might run faster if you use AMP or the Parallel Patterns Library to parallelize the operation.
 		//return concurrency::create_async([this, width, height, pGBitmap]
 		//{
-		return CreateSoftwareBitmap(pGBitmap, NULL);
+		return CreateSoftwareBitmap(pGBitmap);
 		//});
 		
 
@@ -231,21 +187,25 @@ namespace djvulibre
 	}
 
 	// add link to Windowscodecs.lib
-	SoftwareBitmap^ Document::CreateSoftwareBitmap(GP<GBitmap> pGBitmap, GP<GPixmap> pGPixmap)
+	// T = GBitmap | GPixmap
+	template<typename T>
+	SoftwareBitmap^ Document::CreateSoftwareBitmap(GP<T> pBmp)
 	{
 		UINT width;
 		UINT height;
 
-		if (pGBitmap)
-		{
-			width = pGBitmap->columns();
-			height = pGBitmap->rows();
-		}
-		else
-		{
-			width = pGPixmap->columns();
-			height = pGPixmap->rows();
-		}
+		//if (pGBitmap)
+		//{
+		//	width = pGBitmap->columns();
+		//	height = pGBitmap->rows();
+		//}
+		//else
+		//{
+		//	width = pGPixmap->columns();
+		//	height = pGPixmap->rows();
+		//}
+		width = pBmp->columns();
+		height = pBmp->rows();
 
 		// create bitmap
 
@@ -266,10 +226,12 @@ namespace djvulibre
 		// fill bitmap
 
 		BitmapPlaneDescription bufferLayout = buffer->GetPlaneDescription(0);
-		if (pGBitmap)
-			RenderBitmap(*pGBitmap, dataInBytes, bufferLayout.StartIndex, bufferLayout.Stride);
-		else
-			RenderPixmap(*pGPixmap, dataInBytes, bufferLayout.StartIndex, bufferLayout.Stride);
+		//if (pGBitmap)
+		//	RenderBitmap(*pGBitmap, dataInBytes, bufferLayout.StartIndex, bufferLayout.Stride);
+		//else
+		//	RenderPixmap(*pGPixmap, dataInBytes, bufferLayout.StartIndex, bufferLayout.Stride);
+
+		pBmp->convertToBgra(dataInBytes + bufferLayout.StartIndex, bufferLayout.Stride);
 
 		return softwareBitmap;
 	}
@@ -318,5 +280,122 @@ namespace djvulibre
 		}
 
 		return buffer;
+	}
+
+	//-------------------------------------------------
+	//
+	static void
+		fmt_convert_row(const GPixel *p, int w, char *buf)
+	{
+		//case DDJVU_FORMAT_BGR24:    /* truecolor 24 bits in BGR order */
+		memcpy(buf, (const char*)p, 3 * w);
+	}
+
+	static void
+		fmt_convert_row(unsigned char *p, unsigned char g[256][4], int w,
+			char *buf)
+	{
+		//case DDJVU_FORMAT_BGR24:    /* truecolor 24 bits in BGR order */
+			while (--w >= 0) {
+				buf[0] = g[*p][0];
+				buf[1] = g[*p][1];
+				buf[2] = g[*p][2];
+				buf += 3; p += 1;
+			}
+	}
+
+
+	static void
+		fmt_convert(GBitmap *bm, char *buffer, int rowsize)
+	{
+		int w = bm->columns();
+		int h = bm->rows();
+		int m = bm->get_grays();
+		// Gray levels
+		int i;
+		unsigned char g[256][4];
+		const GPixel &wh = GPixel::WHITE;
+		for (i = 0; i<m; i++)
+		{
+			g[i][0] = wh.b - (i * wh.b + (m - 1) / 2) / (m - 1);
+			g[i][1] = wh.g - (i * wh.g + (m - 1) / 2) / (m - 1);
+			g[i][2] = wh.r - (i * wh.r + (m - 1) / 2) / (m - 1);
+			g[i][3] = (5 * g[i][2] + 9 * g[i][1] + 2 * g[i][0]) >> 4;
+		}
+		for (i = m; i<256; i++)
+			g[i][0] = g[i][1] = g[i][2] = g[i][3] = 0;
+
+		// Loop on rows
+		//if (fmt->rtoptobottom)
+		for (int r = h - 1; r >= 0; r--, buffer += rowsize)
+		{
+			fmt_convert_row((*bm)[r], g, w, buffer);
+		}
+	}
+
+	static void
+		fmt_convert(GPixmap *pm, char *buffer, int rowsize)
+	{
+		int w = pm->columns();
+		int h = pm->rows();
+		// Loop on rows
+		//if (fmt->rtoptobottom)
+		for (int r = h - 1; r >= 0; r--, buffer += rowsize)
+			fmt_convert_row((*pm)[r], w, buffer);
+	}
+
+	void
+		render(DjVuDocument *doc, int pageno)
+	{
+		GP<DjVuImage> page = doc->get_page(pageno);
+		
+		GRect prect;
+		int iw = page->get_width();
+		int ih = page->get_height();
+		int dpi = page->get_dpi();
+
+		char white = (char)0xFF;
+		int rowsize;
+
+		/* Process size specification */
+		prect.xmin = 0;
+		prect.ymin = 0;
+		prect.ymax = iw;
+		prect.xmax = ih;
+
+		/* Process mode specification */
+		
+		//mode = DDJVU_RENDER_COLOR;
+
+		/* Determine output pixel format and compression */
+		
+		//ddjvu_format_style_t style = DDJVU_FORMAT_RGB24;
+		//ddjvu_format_t * fmt = ddjvu_format_create(style, 0, 0);
+		//fmt->rtoptobottom = true;
+
+		/* Allocate buffer */
+		
+		rowsize = iw * 3;
+		char *image = (char*)malloc(rowsize * ih);
+			
+		/* Render */
+		
+		//ddjvu_page_render(page, mode, &prect, &rrect, fmt, rowsize, image);
+		
+		GP<GPixmap> pm;
+		GP<GBitmap> bm;
+
+		pm = page->get_pixmap(prect,prect, 2.2, GPixel::WHITE);
+		if (!pm)
+			bm = page->get_bitmap(prect,prect);
+			
+		if (pm)
+		{
+			fmt_convert(pm, image, rowsize);
+		}
+		else if (bm)
+		{
+			fmt_convert(bm, image, rowsize);
+		}
 	}
 }

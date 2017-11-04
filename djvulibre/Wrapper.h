@@ -27,7 +27,9 @@ namespace djvulibre
 		GP<DjVuDocument> _doc;
 
 		static std::string ConvertCxStringToUTF8(Platform::String^ stringToConvert);
-		Windows::Graphics::Imaging::SoftwareBitmap^ Document::CreateSoftwareBitmap(GP<GBitmap> pGBitmap, GP<GPixmap> pGPixmap);
+		//Windows::Graphics::Imaging::SoftwareBitmap^ Document::CreateSoftwareBitmap(GP<GBitmap> pGBitmap, GP<GPixmap> pGPixmap);
+		template<typename T> 
+		Windows::Graphics::Imaging::SoftwareBitmap^ CreateSoftwareBitmap(GP<T> pBmp);
 	};
 
 }

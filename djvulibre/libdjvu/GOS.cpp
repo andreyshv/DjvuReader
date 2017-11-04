@@ -67,7 +67,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
@@ -82,29 +82,6 @@
 # include <direct.h>
 # define getcwd _getcwd
 #endif
-
-#if defined(OS2)
-# define INCL_DOS
-# include <os2.h>
-#endif
-
-#if defined(macintosh) && !defined(UNIX)
-# include <unix.h>
-# include <errno.h>
-# include <unistd.h>
-#endif
-
-#if defined(UNIX) || defined(OS2)
-# include <errno.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <sys/time.h>
-# include <fcntl.h>
-# include <pwd.h>
-# include <stdio.h>
-# include <unistd.h>
-#endif
-
 
 // -- TRUE FALSE
 #undef TRUE
@@ -164,15 +141,7 @@ static const char nillchar=0;
 static inline int
 finddirsep(const GUTF8String &fname)
 {
-#if defined(_WIN32)
   return fname.rcontains("\\/",0);
-#elif defined(UNIX)
-  return fname.rsearch('/',0);
-#elif defined(macintosh)
-  return fname.rcontains(":/",0);
-#else
-# error "Define something here for your operating system"
-#endif  
 }
 
 
@@ -261,24 +230,8 @@ errmsg()
 unsigned long 
 GOS::ticks()
 {
-#if defined(UNIX)
-  struct timeval tv;
-  if (gettimeofday(&tv, NULL) < 0)
-    G_THROW(errmsg());
-  return (unsigned long)( ((tv.tv_sec & 0xfffff)*1000) 
-                          + (tv.tv_usec/1000) );
-#elif defined(_WIN32)
   DWORD clk = GetTickCount();
   return (unsigned long)clk;
-#elif defined(OS2)
-  ULONG clk = 0;
-  DosQuerySysInfo(QSV_MS_COUNT, QSV_MS_COUNT, (PVOID)&clk, sizeof(ULONG));
-  return clk;
-#elif defined(macintosh)
-  return (unsigned long)((double)TickCount()*16.66);
-#else
-# error "Define something here for your operating system"
-#endif
 }
 
 // sleep(int milliseconds) --
@@ -286,24 +239,7 @@ GOS::ticks()
 void 
 GOS::sleep(int milliseconds)
 {
-#if defined(UNIX)
-  struct timeval tv;
-  tv.tv_sec = milliseconds / 1000;
-  tv.tv_usec = (milliseconds - (tv.tv_sec * 1000)) * 1000;
-  ::select(0, NULL, NULL, NULL, &tv);
-#elif defined(_WIN32)
   Sleep(milliseconds);
-#elif defined(OS2)
-  DosSleep(milliseconds);
-#elif defined(macintosh)
-  unsigned long tick = ticks(), now;
-  while (1) {
-    now = ticks();
-    if ((tick+milliseconds) < now)
-      break;
-    GThread::yield();
-  }
-#endif
 }
 
 
@@ -317,16 +253,6 @@ GOS::sleep(int milliseconds)
 GUTF8String 
 GOS::cwd(const GUTF8String &dirname)
 {
-#if defined(UNIX) || defined(macintosh) || defined(OS2)
-  if (dirname.length() && chdir(dirname.getUTF82Native())==-1)//MBCS cvt
-    G_THROW(errmsg());
-  char *string_buffer;
-  GPBuffer<char> gstring_buffer(string_buffer,MAXPATHLEN+1);
-  char *result = getcwd(string_buffer,MAXPATHLEN);
-  if (!result)
-    G_THROW(errmsg());
-  return GNativeString(result).getNative2UTF8();//MBCS cvt
-#elif defined(_WIN32)
 #if !ERR
   char drv[2];
   if (dirname.length() && _chdir(dirname.getUTF82Native())==-1)//MBCS cvt
@@ -340,9 +266,6 @@ GOS::cwd(const GUTF8String &dirname)
 #endif
   GUTF8String retval;
   return retval;
-#else
-# error "Define something here for your operating system"
-#endif 
 }
 
 GUTF8String

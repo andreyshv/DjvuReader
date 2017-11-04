@@ -806,17 +806,7 @@ public:
 	virtual void 	set_recover_errors(ErrorRecoveryAction = ABORT);
 	virtual void 	set_verbose_eof(bool = true);
 
-	static void set_compress_codec(
-		void(*codec)(GP<ByteStream> &, const GURL &where, bool bundled));
-
-	static void set_import_codec(
-		void(*codec)(GP<DataPool> &, const GURL &url, bool &, bool &));
-
 protected:
-	static void(*djvu_import_codec) (
-		GP<DataPool> &pool, const GURL &url, bool &needs_compression, bool &needs_rename);
-	static void(*djvu_compress_codec) (
-		GP<ByteStream> &bs, const GURL &where, bool bundled);
 	virtual GP<DjVuFile>	url_to_file(const GURL & url, bool dont_create = false) const;
 	GURL			init_url;
 	GP<DataPool>		init_data_pool;

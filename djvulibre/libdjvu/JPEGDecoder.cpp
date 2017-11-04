@@ -67,7 +67,7 @@ extern "C" {
 #undef HAVE_STDDEF_H
 #define INT32 jpeg_INT32
 #define INT16 jpeg_INT16
-#include <stdio.h>
+//#include <stdio.h>
 #include <jconfig.h>
 #include <jpeglib.h>
 #include <jerror.h>

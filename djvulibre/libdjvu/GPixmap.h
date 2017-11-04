@@ -424,11 +424,14 @@ public:
 
 	//@}
 
+	// Copy bitmap data to buffer
+	void convertToBgra(unsigned char *buffer, int rowsize);
+
 	// Please ignore these two functions. Their only purpose is to allow
 	// DjVu viewer compile w/o errors. eaf. 
 	// Is this still useful ?. lyb.
-	int get_grays(void) const { return 256; };
-	void set_grays(int) {}; \
+	//int get_grays(void) const { return 256; };
+	//void set_grays(int) {}; \
 
 protected:
 	// data
@@ -438,6 +441,8 @@ protected:
 	GPixel *pixels;
 	GPixel *pixels_data;
 	friend class DjVu_PixImage;
+private:
+	static inline void convert_row(const GPixel *p, int w, unsigned char *buf);
 };
 
 //@}

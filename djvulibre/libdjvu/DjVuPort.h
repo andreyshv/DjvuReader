@@ -287,35 +287,6 @@ public:
 };
 
 
-/** Memory based port.
-    This \Ref{DjVuPort} maintains a map associating pseudo urls with data
-    segments.  It processes the #request_data# notifications according to this
-    map.  After initializing the port, you should add as many pairs #<url,
-    pool># as needed need and add a route from a \Ref{DjVuDocument} or
-    \Ref{DjVuFile} to this port. */
-
-class DJVUAPI DjVuMemoryPort : public DjVuPort
-{
-public:
-      /// Returns 1 if #class_name# is #"DjVuPort"# or #"DjVuMemoryPort"#
-   virtual bool		inherits(const GUTF8String &class_name) const;
-
-      /** If #url# is one of those, that have been added before by means
-	  of \Ref{add_data}() function, it will return the associated
-	  \Ref{DataPool}. #ZERO# otherwize. */
-   virtual GP<DataPool>	request_data(const DjVuPort * source, const GURL & url);
-
-      /** Adds #<url, pool># pair to the internal map. From now on, if
-	  somebody asks for data corresponding to the #url#, it will
-	  be returning the #pool# */
-   void		add_data(const GURL & url, const GP<DataPool> & pool);
-private:
-   GCriticalSection	lock;
-   GPMap<GURL, DataPool>map;
-};
-
-
-
 /** Maintains associations between ports.
     It monitors the status of all ports (have they been destructed yet?),
     accepts requests and notifications from them and forwards them to
@@ -493,13 +464,6 @@ DjVuSimplePort::inherits(const GUTF8String &class_name) const
 {
    return
       (class_name == "DjVuSimplePort") || DjVuPort::inherits(class_name);
-}
-
-inline bool
-DjVuMemoryPort::inherits(const GUTF8String &class_name) const
-{
-   return
-      (class_name == "DjVuMemoryPort") || DjVuPort::inherits(class_name);
 }
 
 //@}

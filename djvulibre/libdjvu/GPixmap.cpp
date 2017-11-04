@@ -1739,6 +1739,35 @@ namespace DJVU {
 		return newpixmap;
 	}
 
+	inline void	GPixmap::convert_row(const GPixel *p, int w, unsigned char *buf)
+	{
+		// BGR -> BGRA
+		for (int x = 0; x < w; ++x, buf += 4, ++p)
+		{
+			*((GPixel *)buf) = *p;
+			buf[3] = 0xff;
+		}
+	}
+
+	// Copy bitmap data to buffer
+	void GPixmap::convertToBgra(unsigned char *buffer, int rowsize)
+	{
+		int w = columns();
+		int h = rows();
+		
+		// Loop on rows
+		//for (int r = h - 1; r >= 0; r--, buffer += rowsize)
+		//	convert_row(operator[](r), w, buffer);
+
+		GPixel *p = (*this)[h - 1];
+		for (int r = h - 1; r >= 0; r--)
+		{
+			convert_row(p, w, buffer);
+			
+			p -= this->rowsize();
+			buffer += rowsize;
+		}
+	}
 
 
 }

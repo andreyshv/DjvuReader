@@ -71,7 +71,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 
 namespace DJVU {

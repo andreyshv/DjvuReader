@@ -451,6 +451,8 @@ public:
 	enum { RUNMSBMASK = 0x3f };
 	enum { RUNLSBMASK = 0xff };
 
+	// Copy bitmap data to buffer
+	void convertToBgra(unsigned char *buffer, int rowsize);
 
 protected:
 	// bitmap components
@@ -492,6 +494,8 @@ private:
 	static void makerows(int, const int, unsigned char *, unsigned char *[]);
 	friend class DjVu_Stream;
 	friend class DjVu_PixImage;
+
+	static inline void convert_row(unsigned char *p, unsigned int g[256], int w, unsigned int *buf);
 public:
 #ifndef NDEBUG
 	void check_border() const;

@@ -65,14 +65,10 @@
 
 #include "DjVuFile.h"
 
-#ifndef macintosh //MCW can't compile
-# ifndef UNDER_CE
-#  include <sys/types.h>
-#  include <time.h>
-# endif 
-#else
+#ifndef UNDER_CE
+# include <sys/types.h>
 # include <time.h>
-#endif
+#endif 
 
 
 namespace DJVU {

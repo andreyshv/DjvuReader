@@ -18,8 +18,8 @@
     <!--WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion-->
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformMinVersion>10.0.15063.0</WindowsTargetPlatformMinVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.16299.0</WindowsTargetPlatformMinVersion>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
     <ProjectName>djvulibre</ProjectName>
   </PropertyGroup>
@@ -53,13 +53,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <DisableSpecificWarnings>4275;4996;4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <!--DisableSpecificWarnings>4275;4996;4251;%(DisableSpecificWarnings)</DisableSpecificWarnings-->
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>ERR;WIN32;_DEBUG;_WINDOWS;_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ERR;WIN32;_DEBUG;_WINDOWS;_WINRT_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -87,7 +87,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>DJVUAPI_EXPORT;DDJVUAPI_EXPORT;MINILISPAPI_EXPORT;WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBDJVULIBRE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -108,7 +108,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DjVuLibre.cpp" />
+    <ClCompile Include="Wrapper.cpp" />
     <ClCompile Include="libdjvu\Arrays.cpp" />
     <ClCompile Include="libdjvu\atomic.cpp" />
     <ClCompile Include="libdjvu\BSByteStream.cpp" />
@@ -123,7 +123,6 @@
     <ClCompile Include="libdjvu\DjVuAnno.cpp" />
     <ClCompile Include="libdjvu\DjVuDocEditor.cpp" />
     <ClCompile Include="libdjvu\DjVuDocument.cpp" />
-    <ClCompile Include="libdjvu\DjVuDumpHelper.cpp" />
     <ClCompile Include="libdjvu\DjVuErrorList.cpp" />
     <ClCompile Include="libdjvu\DjVuFile.cpp" />
     <ClCompile Include="libdjvu\DjVuFileCache.cpp" />
@@ -137,7 +136,6 @@
     <ClCompile Include="libdjvu\DjVuPalette.cpp" />
     <ClCompile Include="libdjvu\DjVuPort.cpp" />
     <ClCompile Include="libdjvu\DjVuText.cpp" />
-    <ClCompile Include="libdjvu\DjVuToPS.cpp" />
     <ClCompile Include="libdjvu\GBitmap.cpp" />
     <ClCompile Include="libdjvu\GContainer.cpp" />
     <ClCompile Include="libdjvu\GException.cpp" />
@@ -166,7 +164,7 @@
     <ClCompile Include="libdjvu\ZPCodec.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DjVuLibre.h" />
+    <ClInclude Include="Wrapper.h" />
     <ClInclude Include="libdjvu\Arrays.h" />
     <ClInclude Include="libdjvu\atomic.h" />
     <ClInclude Include="libdjvu\BSByteStream.h" />
@@ -180,7 +178,6 @@
     <ClInclude Include="libdjvu\DjVuAnno.h" />
     <ClInclude Include="libdjvu\DjVuDocEditor.h" />
     <ClInclude Include="libdjvu\DjVuDocument.h" />
-    <ClInclude Include="libdjvu\DjVuDumpHelper.h" />
     <ClInclude Include="libdjvu\DjVuErrorList.h" />
     <ClInclude Include="libdjvu\DjVuFile.h" />
     <ClInclude Include="libdjvu\DjVuFileCache.h" />
@@ -193,7 +190,6 @@
     <ClInclude Include="libdjvu\DjVuPalette.h" />
     <ClInclude Include="libdjvu\DjVuPort.h" />
     <ClInclude Include="libdjvu\DjVuText.h" />
-    <ClInclude Include="libdjvu\DjVuToPS.h" />
     <ClInclude Include="libdjvu\GBitmap.h" />
     <ClInclude Include="libdjvu\GContainer.h" />
     <ClInclude Include="libdjvu\GException.h" />

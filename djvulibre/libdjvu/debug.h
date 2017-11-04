@@ -63,7 +63,7 @@
 # pragma interface
 #endif
 
-#include <stdio.h>
+//#include <stdio.h>
 
 
 namespace DJVU {
@@ -190,7 +190,7 @@ public:
   ~DjVuDebug();
   // access
   static void   set_debug_level(int lvl);
-  static void	set_debug_file(FILE * file);
+  //static void	set_debug_file(FILE * file);
   void          modify_indent(int rindent);
   static DjVuDebug& lock(int lvl, int noindent);
   void          unlock();

@@ -82,29 +82,6 @@ namespace DJVU {
 static const char octets[4] = { 0x41,0x54,0x26,0x54 };
 const float	DjVuDocument::thumb_gamma = (float)2.20;
 
-void(*DjVuDocument::djvu_import_codec)(
-	GP<DataPool> &pool, const GURL &url, bool &needs_compression,
-	bool &needs_rename) = 0;
-
-void(*DjVuDocument::djvu_compress_codec)(
-	GP<ByteStream> &doc, const GURL &where, bool bundled) = 0;
-
-void
-DjVuDocument::set_import_codec(
-	void(*codec)(
-		GP<DataPool> &pool, const GURL &url, bool &needs_compression, bool &needs_rename))
-{
-	djvu_import_codec = codec;
-}
-
-void
-DjVuDocument::set_compress_codec(
-	void(*codec)(
-		GP<ByteStream> &doc, const GURL &where, bool bundled))
-{
-	djvu_compress_codec = codec;
-}
-
 DjVuDocument::DjVuDocument(void)
 	: doc_type(UNKNOWN_TYPE),
 	needs_compression_flag(false),
@@ -184,10 +161,6 @@ DjVuDocument::start_init(
 		init_data_pool = pcaster->request_data(this, init_url);
 		if (init_data_pool)
 		{
-			if (!init_url.is_empty() && init_url.is_local_file_url() && djvu_import_codec)
-			{
-				djvu_import_codec(init_data_pool, init_url, needs_compression_flag, needs_rename_flag);
-			}
 			if (needs_rename_flag)
 				can_compress_flag = true;
 		}
@@ -430,6 +403,7 @@ DjVuDocument::init_thread(void)
 		pcaster->notify_doc_flags_changed(this, DOC_TYPE_KNOWN, 0);
 		check_unnamed_files();
 	}
+
 	if (doc_type == OLD_BUNDLED || doc_type == SINGLE_PAGE)
 	{
 		DEBUG_MSG("Searching for NDIR chunks...\n");
@@ -1543,14 +1517,11 @@ DjVuDocument::request_data(const DjVuPort * source, const GURL & url)
 				if (doc_type == INDIRECT && !djvm_dir->id_to_file(url.fname()))
 					G_THROW(ERR_MSG("DjVuDocument.URL_outside2") "\t" + url.get_string());
 
-			if (url.is_local_file_url())
-			{
-				DEBUG_MSG("url=" << url << "\n");
+			DEBUG_MSG("url=" << url << "\n");
 
-				data_pool = DataPool::create(url);
-			}
+			data_pool = DataPool::create(url);
 		}
-		}
+	}
 	return data_pool;
 }
 
@@ -1688,10 +1659,7 @@ DjVuDocument::get_url_names(void)
 	}
 	for (GPosition j = map; j; ++j)
 	{
-		if (map.key(j).is_local_file_url())
-		{
-			url_names.append(map.key(j));
-		}
+		url_names.append(map.key(j));
 	}
 	has_url_names = true;
 	return url_names;
@@ -1837,21 +1805,12 @@ DjVuDocument::save_as(const GURL &where, bool bundled)
 
 	if (needs_compression())
 	{
-		if (!djvu_compress_codec)
-		{
-			G_THROW(ERR_MSG("DjVuDocument.comp_codec"));
-		}
-		GP<ByteStream> gmbs = ByteStream::create();
-		write(gmbs);
-		ByteStream &mbs = *gmbs;
-		mbs.flush();
-		mbs.seek(0, SEEK_SET);
-		(*djvu_compress_codec)(gmbs, where, bundled);
+		G_THROW(ERR_MSG("DjVuDocument.comp_codec"));
 	}
 	else if (bundled)
 	{
 		DataPool::load_file(where);
-		write(ByteStream::create(where, "wb"));
+		write(ByteStream::create(where, std::ios_base::binary | std::ios_base::out));
 	}
 	else
 	{

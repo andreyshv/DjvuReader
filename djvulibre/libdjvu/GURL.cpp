@@ -74,7 +74,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
@@ -99,67 +99,6 @@
 # endif
 #endif
 
-#if defined(UNIX) || defined(OS2)
-# include <unistd.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <errno.h>
-# include <fcntl.h>
-# include <pwd.h>
-# include <stdio.h>
-# ifdef AUTOCONF
-#  ifdef TIME_WITH_SYS_TIME
-#   include <sys/time.h>
-#   include <time.h>
-#  else
-#   ifdef HAVE_SYS_TIME_H
-#    include <sys/time.h>
-#   else
-#    include <time.h>
-#   endif
-#  endif
-#  ifdef HAVE_DIRENT_H
-#   include <dirent.h>
-#   define NAMLEN(dirent) strlen((dirent)->d_name)
-#  else
-#   define dirent direct
-#   define NAMLEN(dirent) (dirent)->d_namlen
-#   ifdef HAVE_SYS_NDIR_H
-#    include <sys/ndir.h>
-#   endif
-#   ifdef HAVE_SYS_DIR_H
-#    include <sys/dir.h>
-#   endif
-#   ifdef HAVE_NDIR_H
-#    include <ndir.h>
-#   endif
-#  endif
-# else /* !AUTOCONF */ 
-#  include <sys/time.h>
-#  if defined(XENIX)
-#   define USE_DIRECT
-#   include <sys/ndir.h>
-#  elif defined(OLDBSD)
-#   define USE_DIRECT
-#   include <sys/dir.h>
-#  endif
-#  ifdef USE_DIRECT
-#   define dirent direct
-#   define NAMLEN(dirent) (dirent)->d_namlen
-#  else
-#   include <dirent.h>
-#   define NAMLEN(dirent) strlen((dirent)->d_name)
-#  endif 
-# endif /* !AUTOCONF */
-#endif /* UNIX */
-
-#ifdef macintosh
-#include <unix.h>
-#include <errno.h>
-#include <unistd.h>
-#endif
-
-
 namespace DJVU {
 
 
@@ -175,16 +114,7 @@ static const char percent = '%';
 static const char localhostspec1[] = "//localhost/";
 static const char localhostspec2[] = "///";
 static const char nillchar = 0;
-#if defined(UNIX)
-static const char tilde = '~';
-static const char root[] = "/";
-#elif defined(_WIN32) || defined(OS2)
 static const char root[] = "\\";
-#elif defined(macintosh)
-static char const * const root = &nillchar;
-#else
-#error "Define something here for your operating system"
-#endif
 
 
 static const int
@@ -1074,19 +1004,7 @@ GURL::encode_reserved(const GUTF8String &gs)
 	for (; *s; s++, d++)
 	{
 		// Convert directory separator to slashes
-#if defined(_WIN32) || defined(OS2)
 		if (*s == backslash || *s == slash)
-#else
-#ifdef macintosh
-		if (*s == colon)
-#else
-#ifdef UNIX
-		if (*s == slash)
-#else
-#error "Define something here for your operating system"
-#endif  
-#endif
-#endif
 		{
 			*d = slash;
 			continue;
@@ -1309,17 +1227,6 @@ GURL::UTF8Filename(void) const
 			return GOS::basename(url_ptr);
 		url_ptr += sizeof(filespec) - 1;
 
-#if defined(macintosh)
-		//remove all leading slashes
-		for (; *url_ptr == slash; url_ptr++)
-			EMPTY_LOOP;
-		// Remove possible localhost spec
-		if (!GStringRep::cmp(localhost, url_ptr, sizeof(localhost) - 1))
-			url_ptr += sizeof(localhost) - 1;
-		//remove all leading slashes
-		while (*url_ptr == slash)
-			url_ptr++;
-#else
 		// Remove possible localhost spec
 		if (!GStringRep::cmp(localhostspec1, url_ptr, sizeof(localhostspec1) - 1))
 			// RFC 1738 local host form
@@ -1338,25 +1245,9 @@ GURL::UTF8Filename(void) const
 			&& (url_ptr[0] == slash)
 			&& (url_ptr[1] != slash))
 			url_ptr++;
-#endif
 
 		// Check if we are finished
-#if defined(macintosh)
-		{
-			char *l_url;
-			GPBuffer<char> gl_url(l_url, strlen(url_ptr) + 1);
-			const char *s;
-			char *r;
-			for (s = url_ptr, r = l_url; *s; s++, r++)
-			{
-				*r = (*s == slash) ? colon : *s;
-			}
-			*r = 0;
-			retval = expand_name(l_url, root);
-		}
-#else  
 		retval = expand_name(url_ptr, root);
-#endif
 
 #if defined(_WIN32) || defined(OS2)
 		if (url_ptr[0] && url_ptr[1] == '|' && url_ptr[2] == slash)
@@ -1381,14 +1272,6 @@ GURL::NativeFilename(void) const
 	return UTF8Filename().getUTF82Native();
 }
 
-#if defined(UNIX) || defined(macintosh) || defined(OS2)
-static int
-urlstat(const GURL &url, struct stat &buf)
-{
-	return ::stat(url.NativeFilename(), &buf);
-}
-#endif
-
 // is_file(url) --
 // -- returns true if filename denotes a regular file.
 bool
@@ -1397,13 +1280,6 @@ GURL::is_file(void) const
 	bool retval = false;
 	if (is_local_file_url())
 	{
-#if defined(UNIX) || defined(macintosh) || defined(OS2)
-		struct stat buf;
-		if (!urlstat(*this, buf))
-		{
-			retval = !(buf.st_mode & S_IFDIR);
-		}
-#elif defined(_WIN32)
 		GUTF8String filename(UTF8Filename());
 		if (filename.length() >= MAX_PATH)
 		{
@@ -1421,9 +1297,6 @@ GURL::is_file(void) const
 		if ((dwAttrib | 1) == 0xFFFFFFFF)
 			dwAttrib = GetFileAttributesA(NativeFilename());
 		retval = !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
-#else
-# error "Define something here for your operating system"
-#endif
 	}
 	return retval;
 }
@@ -1434,10 +1307,6 @@ GURL::is_local_path(void) const
 	bool retval = false;
 	if (is_local_file_url())
 	{
-#if defined(UNIX) || defined(macintosh) || defined(OS2)
-		struct stat buf;
-		retval = !urlstat(*this, buf);
-#else
 		GUTF8String filename(UTF8Filename());
 		if (filename.length() >= MAX_PATH)
 		{
@@ -1455,7 +1324,6 @@ GURL::is_local_path(void) const
 		if ((dwAttrib | 1) == 0xFFFFFFFF)
 			dwAttrib = GetFileAttributesA(NativeFilename());
 		retval = ((dwAttrib | 1) != 0xFFFFFFFF);
-#endif
 	}
 	return retval;
 }
@@ -1469,13 +1337,6 @@ GURL::is_dir(void) const
 	if (is_local_file_url())
 	{
 		// UNIX implementation
-#if defined(UNIX) || defined(macintosh) || defined(OS2)
-		struct stat buf;
-		if (!urlstat(*this, buf))
-		{
-			retval = (buf.st_mode & S_IFDIR);
-		}
-#elif defined(_WIN32)   // (either Windows or WCE)
 		GUTF8String filename(UTF8Filename());
 		if (filename.length() >= MAX_PATH)
 		{
@@ -1493,9 +1354,6 @@ GURL::is_dir(void) const
 		if ((dwAttrib | 1) == 0xFFFFFFFF)
 			dwAttrib = GetFileAttributesA(NativeFilename());
 		retval = ((dwAttrib != 0xFFFFFFFF) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-#else
-# error "Define something here for your operating system"
-#endif
 	}
 	return retval;
 }
@@ -1505,21 +1363,6 @@ GURL
 GURL::follow_symlinks(void) const
 {
 	GURL ret = *this;
-#if defined(S_IFLNK)
-#if defined(UNIX) || defined(macintosh)
-	int lnklen;
-	char lnkbuf[MAXPATHLEN + 1];
-	struct stat buf;
-	while ((urlstat(ret, buf) >= 0) &&
-		(buf.st_mode & S_IFLNK) &&
-		((lnklen = readlink(ret.NativeFilename(), lnkbuf, sizeof(lnkbuf))) > 0))
-	{
-		lnkbuf[lnklen] = 0;
-		GNativeString lnk(lnkbuf);
-		ret = GURL(lnk, ret.base());
-	}
-#endif
-#endif
 	return ret;
 }
 

@@ -72,7 +72,7 @@
 #include "GURL.h"
 
 #include <stdarg.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <errno.h>
 
 #ifdef _WIN32
@@ -81,15 +81,6 @@
 
 
 namespace DJVU {
-
-
-#ifndef UNIX
-#ifndef _WIN32
-#ifndef macintosh
-#define UNIX
-#endif
-#endif
-#endif
 
 static GCriticalSection debug_lock;
 #ifdef RUNTIME_DEBUG_ONLY
@@ -112,22 +103,10 @@ DjVuDebug::DjVuDebug()
   : block(0), indent(0)
 {
   id = debug_id++;
-#ifdef UNIX
-  if (debug_file_count++ == 0 && !debug_file)
-    set_debug_file(stderr);
-#endif
 }
 
 DjVuDebug::~DjVuDebug()
 {
-#ifdef UNIX
-  if (--debug_file_count == 0)
-    {
-      if (debug_file && (debug_file != stderr))
-        fclose(debug_file);
-      debug_file = 0;
-    }
-#endif
 }
 
 void   
@@ -160,14 +139,14 @@ DjVuDebug::set_debug_level(int lvl)
   debug_level = lvl;
 }
 
-void
+/*void
 DjVuDebug::set_debug_file(FILE * file)
 {
   GCriticalSectionLock glock(&debug_lock);
   if (debug_file && (debug_file != stderr))
     fclose(debug_file);
   debug_file = file;
-}
+}*/
 
 void
 DjVuDebug::modify_indent(int rindent)

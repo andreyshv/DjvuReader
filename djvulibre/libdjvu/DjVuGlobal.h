@@ -62,13 +62,8 @@
 # pragma interface
 #endif
 
-#if defined(HAVE_STDINCLUDES)
-# include <new>
-#elif defined(HAVE_NEW_H)
-# include <new.h>
-#else
-# include <new> // try standard c++ anyway!
-#endif
+#include <new>
+
 
 #ifdef _WIN32
 # ifdef DJVUAPI_EXPORT
@@ -359,11 +354,7 @@ DJVUEXTERNCAPI(const char *djvu_programname(const char *programname));
 
 //@}
 
-#if defined(macintosh)
-# define EMPTY_LOOP continue
-#else
 # define EMPTY_LOOP /* nop */
-#endif
 
 //  The ERR_MSG(x) macro is intended to permit automated checking of the
 //  externalized error message names against the source code. It has no

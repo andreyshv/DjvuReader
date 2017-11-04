@@ -444,11 +444,12 @@ void
 DjVuWriteError( const char *message )
 {
   try {
-    GP<ByteStream> errout = ByteStream::get_stderr();
-    if (errout)
+    //GP<ByteStream> errout = ByteStream::get_stderr();
+    //if (errout)
       {
         const GUTF8String external = DjVuMessageLite::LookUpUTF8( message );
-        errout->writestring(external+"\n");
+        //errout->writestring(external+"\n");
+		std::cerr << external << "\n";
       }
     // Need to catch all exceptions because these might be 
     // called from an outer exception handler (with prejudice)
@@ -459,11 +460,12 @@ void
 DjVuWriteMessage( const char *message )
 {
   try {
-    GP<ByteStream> strout = ByteStream::get_stdout();
-    if (strout)
+    //GP<ByteStream> strout = ByteStream::get_stdout();
+    //if (strout)
       {
         const GUTF8String external = DjVuMessageLite::LookUpUTF8( message );
-        strout->writestring(external+"\n");
+        //strout->writestring(external+"\n");
+		std::cout << external << "\n";
       }
     // Need to catch all exceptions because these might be 
     // called from an outer exception handler (with prejudice)

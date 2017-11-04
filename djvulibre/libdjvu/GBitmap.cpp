@@ -66,9 +66,9 @@
 #include "GString.h"
 #include "GThreads.h"
 #include "GException.h"
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stddef.h>
+//#include <stdlib.h>
+//#include <string.h>
 
 // - Author: Leon Bottou, 05/1997
 
@@ -204,6 +204,7 @@ GBitmap::init(int arows, int acolumns, int aborder)
 		acolumns != (unsigned short)acolumns ||
 		acolumns + aborder != (unsigned short)(acolumns + aborder))
 		G_THROW("Illegal arguments");
+
 	GMonitorLock lock(monitor());
 	destroy();
 	grays = 2;
@@ -1674,6 +1675,46 @@ GBitmap::check_border() const
 }
 #endif
 
+inline void GBitmap::convert_row(unsigned char *p, unsigned int g[256], int w, unsigned int *buf)
+{
+	/* truecolor 32 bits in BGRA order */
+	while (--w >= 0) {
+		*buf = g[*p];
+		buf++; 
+		p++;
+	}
+}
+
+void GBitmap::convertToBgra(unsigned char *buffer, int rowsize)
+{
+	int w = columns();
+	int h = rows();
+	int m = get_grays();
+	// Gray levels
+	int i;
+	unsigned int g[256];
+	unsigned char v;
+	for (i = 0; i<m; i++)
+	{
+		v = 0xff - (i * 0xff + (m - 1) / 2) / (m - 1);
+		g[i] = v | v << 8 | v << 16 | 0xff << 24;
+	}
+
+	// Loop on rows
+	//for (int r = h - 1; r >= 0; r--, buffer += rowsize)
+	//{
+	//	convert_row(operator[](r), g, w, (unsigned int*)buffer);
+	//}
+
+	unsigned char *p = (*this)[h - 1];
+	for (int r = h - 1; r >= 0; r--)
+	{
+		convert_row(p, g, w, (unsigned int*)buffer);
+
+		p -= this->rowsize();
+		buffer += rowsize;
+	}
+}
 
 }
 # ifndef NOT_USING_DJVU_NAMESPACE

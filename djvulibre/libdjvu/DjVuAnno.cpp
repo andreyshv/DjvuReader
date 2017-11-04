@@ -226,7 +226,7 @@ static GUTF8String make_c_string(GUTF8String string)
           char buf[8];
           static const char *tr1 = "\"\\tnrbf";
           static const char *tr2 = "\"\\\t\n\r\b\f";
-          sprintf(buf,"\\%03o", (int)(((unsigned char*)data)[span]));
+          sprintf_s(buf, sizeof(buf), "\\%03o", (int)(((unsigned char*)data)[span]));
           for (int i=0; tr2[i]; i++)
             if (data[span] == tr2[i])
               buf[1] = tr1[i];

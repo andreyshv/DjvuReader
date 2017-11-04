@@ -111,6 +111,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string>
 #ifdef _WIN32
 # include <windows.h>
 # ifndef AUTOCONF
@@ -919,6 +920,9 @@ public:
   static GUTF8String create( const char *buf, const unsigned int bufsize );
   static GUTF8String create( const uint16_t *buf, const unsigned int bufsize );
   static GUTF8String create( const uint32_t *buf, const unsigned int bufsize );
+
+  static GUTF8String create( const std::string str );
+  std::string toString();
 };
 
 
@@ -1459,6 +1463,18 @@ inline GUTF8String
 GUTF8String::create( const uint32_t *buf, const unsigned int bufsize )
 {
   return GUTF8String(buf,bufsize);
+}
+
+inline GUTF8String
+GUTF8String::create( const std::string str )
+{
+	return GUTF8String(str.c_str(), str.length());
+}
+
+inline std::string
+GUTF8String::toString()
+{
+	return std::string(getbuf());
 }
 
 inline GNativeString::GNativeString(void) {}

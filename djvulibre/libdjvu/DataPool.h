@@ -217,7 +217,7 @@ class ByteStream;
 
 class DJVUAPI DataPool : public GPEnabled
 {
-public: // Classes used internally by DataPool
+private: // Classes used internally by DataPool
 	// These are declared public to support buggy C++ compilers.
    class Incrementor;
    class Reader;

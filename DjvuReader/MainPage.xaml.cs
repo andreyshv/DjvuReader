@@ -39,7 +39,7 @@ namespace DjvuReader
 
             //var folder = Windows.Storage.ApplicationData.Current.LocalFolder;
             var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
-            var fileName = folder.Path + @"\Data\test2.djvu";
+            var fileName = folder.Path + @"\Data\test1.djvu";
             //var fileName = @"c:\my\VS-Projects\djvu\djvulibre\doc\djvu3spec.djvu";
 
             var doc = await Task.Run(() =>
@@ -51,15 +51,6 @@ namespace DjvuReader
             PageCount.Text = doc.GetPageCount().ToString();
 
             //int i = doc.GetPageView(0);
-            /*WriteableBitmap writeableBitmap = doc.DrawImage();
-
-            SoftwareBitmap outputBitmap = SoftwareBitmap.CreateCopyFromBuffer(
-                writeableBitmap.PixelBuffer,
-                BitmapPixelFormat.Bgra8,
-                writeableBitmap.PixelWidth,
-                writeableBitmap.PixelHeight,
-                BitmapAlphaMode.Premultiplied
-            );*/
 
             SoftwareBitmap outputBitmap = await Task.Run(() => doc.DrawImage());
             //await SaveBitmapAsync(outputBitmap);

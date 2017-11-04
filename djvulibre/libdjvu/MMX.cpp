@@ -61,7 +61,7 @@
 #endif
 
 #include "MMX.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 

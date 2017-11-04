@@ -591,7 +591,7 @@ DjVmDoc::save_file(const GURL &codebase, const DjVmDir::File &file,
   DEBUG_MSG("storing file '"<<new_url<<"'\n");
   DataPool::load_file(new_url);
   const GP<ByteStream> str_in(pool->get_stream());
-  const GP<ByteStream> str_out(ByteStream::create(new_url, "wb"));
+  const GP<ByteStream> str_out(ByteStream::create(new_url, std::ios_base::binary | std::ios_base::out));
   ::save_file( *IFFByteStream::create(str_in),
       *IFFByteStream::create(str_out), *dir, incl);
   return save_name;
@@ -643,7 +643,7 @@ DjVmDoc::expand(const GURL &codebase, const GUTF8String &idx_name)
       DEBUG_MSG("storing index file '" << idx_url << "'\n");
 
       DataPool::load_file(idx_url);
-      GP<ByteStream> str=ByteStream::create(idx_url, "wb");
+      GP<ByteStream> str=ByteStream::create(idx_url, std::ios_base::binary | std::ios_base::out);
       write_index(str);
    }
 }
